@@ -1,11 +1,11 @@
 'use server';
 
-import ShowFiles from "@/components/ShowFiles";
-import { getData } from "@/io-test";
-import { log } from "@/lib/log";
+import ShowFiles from '@/components/ShowFiles';
 
 export default async function Home() {
-    return <section className="">
-        <ShowFiles params={["./"]} />
-    </section>;
+	return (
+		<section className="">
+			<ShowFiles params={['.']} />
+		</section>
+	);
 }

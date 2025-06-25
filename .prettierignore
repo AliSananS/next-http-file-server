@@ -32,3 +32,10 @@ public/static
 
 # Ignore custom server output (if any)
 dist
+
+# Testing folders
+/folder.root
+/folder
+.next
+.git
+.vscode
