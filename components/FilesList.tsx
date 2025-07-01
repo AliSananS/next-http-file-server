@@ -5,11 +5,8 @@ import { MenuDotsIcon } from './icons';
 
 import { DirEntery } from '@/types';
 import IconMap from '@/components/fileExtensionToIconMap';
-import { log } from '@/lib/log';
 
 export default function FilesList({ files }: { files: DirEntery }) {
-	files.children.forEach(file => log.debug('FilesList.tsx:', file));
-
 	return (
 		<div className="flex flex-col gap-2">
 			{files.children.map(file => (

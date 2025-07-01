@@ -1,5 +1,7 @@
 'use client';
 
+import path from 'path';
+
 import {
 	Breadcrumbs as HeroBreadcrumbs,
 	BreadcrumbItem,
@@ -7,31 +9,25 @@ import {
 
 import { FileIcon, FolderIcon, HomeIcon } from '@/components/icons';
 import { BreadcrumbsItemsProps } from '@/types';
+import { log } from '@/lib/log';
 
 export default function BreadCrumbs({
 	items,
 }: {
 	items: BreadcrumbsItemsProps;
 }) {
-	console.log('Breadcrumbs items:', items);
+	// items.forEach(item => log.debug("href", item.path))
 
 	return (
 		<HeroBreadcrumbs>
-			{items.map((item, index) => (
+			<BreadcrumbItem key="BASE_DIR" href="/" isCurrent={items.length === 1 ? true : false }  startContent={<HomeIcon />}>{""}</BreadcrumbItem>
+			{items.map(item => (
 				<BreadcrumbItem
 					key={item.name}
-					href={items.length !== 0 ? '/' : '/' + item.path}
-					startContent={
-						index === 0 ? (
-							<HomeIcon />
-						) : item.type === 'dir' ? (
-							<FolderIcon />
-						) : (
-							<FileIcon />
-						)
-					}
+					href={path.join('/', item.path)}
+					startContent={item.type === 'dir' ? <FolderIcon /> : <FileIcon />}
 				>
-					{index === 0 ? '' : item.name}
+					{item.name}
 				</BreadcrumbItem>
 			))}
 		</HeroBreadcrumbs>

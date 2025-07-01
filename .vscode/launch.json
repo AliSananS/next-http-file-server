@@ -6,7 +6,8 @@
             "type": "node-terminal",
             "request": "launch",
             "command": "bun run dev",
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}",
+            "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "name": "Next.js: debug client-side",

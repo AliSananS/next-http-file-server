@@ -12,7 +12,6 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import js from '@eslint/js';
 import { FlatCompat } from '@eslint/eslintrc';
-import prettierConfig from './prettier.config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,8 +43,6 @@ export default defineConfig([
 		'!**/plopfile.js',
 		'!**/react-shim.js',
 		'!**/tsup.config.ts',
-		'folder',
-		'folder.root',
 	]),
 	{
 		extends: fixupConfigRules(
@@ -102,10 +99,10 @@ export default defineConfig([
 			'react-hooks/exhaustive-deps': 'off',
 			'jsx-a11y/click-events-have-key-events': 'warn',
 			'jsx-a11y/interactive-supports-focus': 'warn',
-			'prettier/prettier': ['warn', prettierConfig, { usePrettiertc: false }],
+			'prettier/prettier': 'off',
 			'no-unused-vars': 'off',
 			'unused-imports/no-unused-vars': 'off',
-			'unused-imports/no-unused-imports': 'warn',
+			'unused-imports/no-unused-imports': 'off',
 
 			'@typescript-eslint/no-unused-vars': [
 				'warn',

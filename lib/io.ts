@@ -5,7 +5,6 @@ import * as path from 'path';
 import fileTypeMap from './fileTypeMap';
 
 import {
-	DirEntery,
 	FileEntry,
 	FilePermissions,
 	FileTypes,
@@ -14,34 +13,44 @@ import {
 } from '@/types';
 import { log } from '@/lib/log';
 
-export function convertParams(params: string[]): PathLike {
-	return params.join('/').toString();
+function resolveWithBaseDir(baseDir: string, filePath: string) {
+	return path.resolve(baseDir, filePath);
+}
+
+function getRelativePath(baseDir: string, filePath: string) {
+	return path.relative(baseDir, filePath);
+}
+
+export function convertParams(params: string[]): string {
+	return params.join('/');
 }
 
 export async function getData(params: string[]): Promise<GetDataResult> {
-	const filePath = convertParams(params);
+	const baseDir = process.env.BASE_DIR || process.cwd();
+	const relPath = convertParams(params);
+	const filePath = resolveWithBaseDir(baseDir, relPath);
 
 	log.debug('FILE:', filePath);
 	if (!existsSync(filePath)) {
-		console.error('File not found');
+		log.info('File not found');
 
 		return {
-			error: true,
+			kind: 'error',
 			errorCode: 'ENOENT',
 			msg: 'No such file or directory',
 		};
 	}
 
-	const permisions = await checkFilePermisions(filePath);
+	const permisions = await checkFilePermisions(relPath, baseDir);
 
 	if (permisions === 'EACCES') {
 		return {
-			error: true,
+			kind: 'error',
 			errorCode: 'EACCES',
 			msg: 'Permission denied',
 		};
 	}
-	// Check info of the file or directory.
+
 	const fileStat = await fs.stat(filePath);
 
 	if (fileStat.isDirectory()) {
@@ -49,68 +58,72 @@ export async function getData(params: string[]): Promise<GetDataResult> {
 		const data = await fs.readdir(filePath, { withFileTypes: true });
 
 		for (const file of data) {
-			const fullPath = path.join(file.parentPath, file.name);
+			const childRelPath = path.join(relPath, file.name);
+			const fullPath = resolveWithBaseDir(baseDir, childRelPath);
 
-			const filePermisions: FilePermissions =
-				await checkFilePermisions(fullPath);
+			const filePermisions: FilePermissions = await checkFilePermisions(
+				childRelPath,
+				baseDir,
+			);
+			const fileType: FileTypes = await checkFileType(childRelPath, baseDir);
 
 			if (filePermisions === 'EACCES') {
 				filesInDirectory.push({
 					name: file.name,
-					path: fullPath,
+					path: childRelPath,
 					permisions: 'EACCES',
-					type: 'other',
+					type: fileType,
 				});
 				continue;
 			}
 
-			const fileType: FileTypes = await checkFileType(fullPath);
 			const fileDetails = await fs.stat(fullPath);
 
 			filesInDirectory.push({
 				name: file.name,
 				type: fileType,
-				path: fullPath,
+				path: childRelPath,
 				permisions: filePermisions,
 				time: fileDetails.ctime,
 				size: fileDetails.size,
 			});
 		}
-		const directory: DirEntery = {
+
+		return {
+			kind: 'dir',
 			name: params[params.length - 1],
-			path: filePath,
+			path: relPath,
 			children: filesInDirectory,
 		};
-
-		return directory;
 	}
 
 	if (fileStat.isFile()) {
-		const fileType = await checkFileType(filePath);
+		const fileType = await checkFileType(relPath, baseDir);
 
-		const file: FileEntry = {
+		return {
+			kind: 'file',
 			name: params[params.length - 1],
-			path: filePath,
+			path: relPath,
 			type: fileType,
 			permisions: permisions,
 			size: fileStat.size,
 			time: fileStat.ctime,
 		};
-
-		return file;
 	}
 
 	return {
-		error: true,
+		kind: 'error',
 		errorCode: 'UNKNOWN',
 		msg: 'Could not getData because of an unknown error',
 	};
 }
 
 export async function checkFileType(
-	filePath: PathLike | string,
+	relPath: string,
+	baseDir: string,
 ): Promise<FileTypes> {
-	const fileStat = await fs.stat(filePath);
+	const resolvedPath = resolveWithBaseDir(baseDir, relPath);
+	const fileStat = await fs.stat(resolvedPath);
 
 	if (fileStat.isDirectory()) {
 		return 'dir';
@@ -119,35 +132,34 @@ export async function checkFileType(
 		return 'symlink';
 	}
 	if (fileStat.isFile()) {
-		const fileExtension =
-			filePath.toString().split('.').pop() || filePath.toString();
-		let fileType: FileTypes = 'other';
+		const fileExtension = path.extname(resolvedPath);
 
 		for (const [type, extensions] of Object.entries(fileTypeMap)) {
-			if (extensions.includes(fileExtension)) {
-				fileType = type as FileTypes;
-				break;
+			if (
+				extensions.includes(fileExtension.slice(1) /* Remove the first dot */)
+			) {
+				return type as FileTypes;
 			}
 		}
-
-		return fileType;
-	} else {
-		return 'other';
 	}
+
+	return 'other';
 }
 
 export async function checkFilePermisions(
-	filePath: PathLike,
+	relPath: PathLike,
+	baseDir?: string,
 ): Promise<FilePermissions> {
-	// Check for the permisions.
+	const base = baseDir || process.env.BASE_DIR || process.cwd();
+	const resolvedPath = resolveWithBaseDir(base, relPath.toString());
 	const filePermisions: FilePermissions = [];
 
 	try {
-		await fs.access(filePath, fs.constants.R_OK);
+		await fs.access(resolvedPath, fs.constants.R_OK);
 		filePermisions.push('read');
 	} catch {}
 	try {
-		await fs.access(filePath, fs.constants.W_OK);
+		await fs.access(resolvedPath, fs.constants.W_OK);
 		filePermisions.push('write');
 	} catch {}
 	if (filePermisions.length <= 0) {
@@ -158,7 +170,12 @@ export async function checkFilePermisions(
 }
 
 export async function writeFiles(type: FileTypesWithPreview) {
-	fileTypeMap[type].forEach(async file => {
-		await fs.writeFile(`folder/${type}/${type}.${file}`, 'Hi');
-	});
+	const baseDir = process.env.BASE_DIR || process.cwd();
+
+	for (const file of fileTypeMap[type]) {
+		const relPath = `folder/${type}/${type}.${file}`;
+		const filePath = resolveWithBaseDir(baseDir, relPath);
+
+		await fs.writeFile(filePath, 'Hi');
+	}
 }

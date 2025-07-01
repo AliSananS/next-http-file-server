@@ -14,6 +14,7 @@ export type FileTypes =
 	| 'text'
 	| 'image'
 	| 'other';
+
 export type FileTypesWithPreview = Extract<
 	FileTypes,
 	'video' | 'audio' | 'image' | 'text'
@@ -22,7 +23,7 @@ export type FileTypesWithPreview = Extract<
 export type FileEntry = {
 	name: string;
 	type: FileTypes;
-	path: PathLike | string;
+	path: string;
 	permisions: FilePermissions;
 	size?: number;
 	time?: Date;
@@ -30,20 +31,23 @@ export type FileEntry = {
 
 export type DirEntery = {
 	name: string;
-	path: PathLike | string;
+	path: string;
 	children: FileEntry[];
 };
 
 export type FileErrorTypes = 'EACCES' | 'ENOENT' | 'UNKNOWN';
 
 export type FileEntrySuccess = DirEntery | FileEntry;
+
 export type FileEntryError = {
-	error: true;
 	errorCode: FileErrorTypes;
 	msg?: unknown;
 };
 
-export type GetDataResult = FileEntrySuccess | FileEntryError;
+export type GetDataResult =
+	| ({ kind: 'error' } & FileEntryError)
+	| ({ kind: 'dir' } & DirEntery)
+	| ({ kind: 'file' } & FileEntry);
 
 export type BreadcrumbsItemsProps = {
 	name: string;

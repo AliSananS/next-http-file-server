@@ -27,12 +27,7 @@ export const Logo = ({
 	color?: string;
 }) => {
 	return (
-		<FolderWithFiles
-			color={color}
-			size={size}
-			{...props}
-			weight="Outline"
-		/>
+		<FolderWithFiles color={color} size={size} {...props} weight="Outline" />
 	);
 };
 
@@ -64,13 +59,7 @@ export const UploadIcon = ({
 	color?: string;
 }) => {
 	return (
-		<Upload
-			color={color}
-			size={size}
-			{...props}
-			weight="Outline"
-			{...props}
-		/>
+		<Upload color={color} size={size} {...props} weight="Outline" {...props} />
 	);
 };
 
@@ -101,13 +90,7 @@ export const FolderIcon = ({
 	color?: string;
 }) => {
 	return (
-		<Folder
-			color={color}
-			size={size}
-			{...props}
-			weight="Outline"
-			{...props}
-		/>
+		<Folder color={color} size={size} {...props} weight="Outline" {...props} />
 	);
 };
 

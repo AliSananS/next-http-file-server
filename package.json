@@ -3,16 +3,21 @@
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
-		"dev": "NODE_OPTIONS='--inspect' next dev --turbopack",
+		"dev": "next dev --turbopack",
+		"debug": "NODE_OPTIONS='--inspect' next dev --turbopack",
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
-		"format:check": "prettier . --config ./prettier.config.js",
+		"format:check": "prettier .",
 		"format": "prettier -w ."
+	},
+	"bin": {
+		"nhfs": "./bin.js"
 	},
 	"dependencies": {
 		"@heroui/breadcrumbs": "^2.2.17",
 		"@heroui/button": "2.2.21",
+		"@heroui/card": "^2.2.21",
 		"@heroui/code": "2.2.16",
 		"@heroui/divider": "^2.2.15",
 		"@heroui/input": "2.4.21",
@@ -28,6 +33,7 @@
 		"@react-aria/ssr": "3.9.9",
 		"@react-aria/visually-hidden": "3.8.24",
 		"@solar-icons/react": "^1.0.1",
+		"arg": "^5.0.2",
 		"clsx": "2.1.1",
 		"framer-motion": "11.13.1",
 		"intl-messageformat": "10.7.16",

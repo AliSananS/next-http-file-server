@@ -1,21 +1,38 @@
-import { BreadcrumbsItemsProps } from '@/types';
-import { getFileInfo } from '@/lib/io';
+import path from 'path';
 
-export default async function createBreadcrumbsData(path: string[]) {
-	const breadcrumbs: BreadcrumbsItemsProps = [];
-	let currentPath: string[] = [];
+import { BreadcrumbsItemsProps, GetDataResult } from '@/types';
+import { log } from '@/lib/log';
 
-	for (let i = 0; i < path.length; i++) {
-		currentPath = path.slice(0, i + 1);
-		const info = await getFileInfo(currentPath);
+function createBreadcrumbsData(data: GetDataResult): BreadcrumbsItemsProps {
+	const items: BreadcrumbsItemsProps = [];
 
-		breadcrumbs.push({
-			name: path[i],
-			path: [...currentPath].join('/'),
-			type: info?.type === 'dir' ? 'dir' : 'file',
-		});
+	if (data.kind === 'dir' || data.kind === 'file') {
+		log.debug('data:', data.name, data.path);
+
+		// If the path is "." (root relative to baseDir), don't return any breadcrumbs
+		if (data.path === '.' || data.path === './' || data.path === '') {
+			return items;
+		}
+
+		const directoryTree = data.path.split('/');
+
+		for (let i = 0; i < directoryTree.length; i++) {
+			const fileName = directoryTree[i];
+			const currentPath = directoryTree.slice(0, i + 1).join(path.sep);
+
+			log.debug('currentFile:', currentPath);
+
+			items.push({
+				name: fileName,
+				path: currentPath,
+				type: i === directoryTree.length - 1 ? data.kind : 'dir',
+			});
+		}
 	}
-	console.log(breadcrumbs);
 
-	return breadcrumbs;
+	log.debug('createBreadcrumbs.ts:', items);
+
+	return items;
 }
+
+export default createBreadcrumbsData;
