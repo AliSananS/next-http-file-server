@@ -1,24 +1,25 @@
 import { existsSync, PathLike } from 'fs';
 import * as fs from 'node:fs/promises';
 import * as path from 'path';
+import { createReadStream } from 'node:fs';
+
+import mime from "mime-types";
 
 import fileTypeMap from './fileTypeMap';
 
 import {
+	downloadFileResult,
 	FileEntry,
 	FilePermissions,
 	FileTypes,
-	FileTypesWithPreview,
 	GetDataResult,
 } from '@/types';
 import { log } from '@/lib/log';
 
-function resolveWithBaseDir(baseDir: string, filePath: string) {
-	return path.resolve(baseDir, filePath);
-}
+const baseDir = process.env.BASE_DIR || process.cwd();
 
-function getRelativePath(baseDir: string, filePath: string) {
-	return path.relative(baseDir, filePath);
+function resolveWithBaseDir(filePath: string) {
+	return path.resolve(baseDir, filePath);
 }
 
 export function convertParams(params: string[]): string {
@@ -26,9 +27,8 @@ export function convertParams(params: string[]): string {
 }
 
 export async function getData(params: string[]): Promise<GetDataResult> {
-	const baseDir = process.env.BASE_DIR || process.cwd();
 	const relPath = convertParams(params);
-	const filePath = resolveWithBaseDir(baseDir, relPath);
+	const filePath = resolveWithBaseDir(relPath);
 
 	log.debug('FILE:', filePath);
 	if (!existsSync(filePath)) {
@@ -41,9 +41,9 @@ export async function getData(params: string[]): Promise<GetDataResult> {
 		};
 	}
 
-	const permisions = await checkFilePermisions(relPath, baseDir);
+	const permissions = await checkFilePermissions(relPath);
 
-	if (permisions === 'EACCES') {
+	if (permissions === 'EACCES') {
 		return {
 			kind: 'error',
 			errorCode: 'EACCES',
@@ -59,19 +59,16 @@ export async function getData(params: string[]): Promise<GetDataResult> {
 
 		for (const file of data) {
 			const childRelPath = path.join(relPath, file.name);
-			const fullPath = resolveWithBaseDir(baseDir, childRelPath);
+			const fullPath = resolveWithBaseDir(childRelPath);
 
-			const filePermisions: FilePermissions = await checkFilePermisions(
-				childRelPath,
-				baseDir,
-			);
-			const fileType: FileTypes = await checkFileType(childRelPath, baseDir);
+			const filePermissions: FilePermissions = await checkFilePermissions(childRelPath);
+			const fileType: FileTypes = await checkFileType(childRelPath);
 
-			if (filePermisions === 'EACCES') {
+			if (filePermissions === 'EACCES') {
 				filesInDirectory.push({
 					name: file.name,
 					path: childRelPath,
-					permisions: 'EACCES',
+					permissions: 'EACCES',
 					type: fileType,
 				});
 				continue;
@@ -83,7 +80,7 @@ export async function getData(params: string[]): Promise<GetDataResult> {
 				name: file.name,
 				type: fileType,
 				path: childRelPath,
-				permisions: filePermisions,
+				permissions: filePermissions,
 				time: fileDetails.ctime,
 				size: fileDetails.size,
 			});
@@ -98,14 +95,14 @@ export async function getData(params: string[]): Promise<GetDataResult> {
 	}
 
 	if (fileStat.isFile()) {
-		const fileType = await checkFileType(relPath, baseDir);
+		const fileType = await checkFileType(relPath);
 
 		return {
 			kind: 'file',
 			name: params[params.length - 1],
 			path: relPath,
 			type: fileType,
-			permisions: permisions,
+			permissions: permissions,
 			size: fileStat.size,
 			time: fileStat.ctime,
 		};
@@ -120,9 +117,8 @@ export async function getData(params: string[]): Promise<GetDataResult> {
 
 export async function checkFileType(
 	relPath: string,
-	baseDir: string,
 ): Promise<FileTypes> {
-	const resolvedPath = resolveWithBaseDir(baseDir, relPath);
+	const resolvedPath = resolveWithBaseDir(relPath);
 	const fileStat = await fs.stat(resolvedPath);
 
 	if (fileStat.isDirectory()) {
@@ -146,36 +142,46 @@ export async function checkFileType(
 	return 'other';
 }
 
-export async function checkFilePermisions(
+export async function checkFilePermissions(
 	relPath: PathLike,
-	baseDir?: string,
 ): Promise<FilePermissions> {
-	const base = baseDir || process.env.BASE_DIR || process.cwd();
-	const resolvedPath = resolveWithBaseDir(base, relPath.toString());
-	const filePermisions: FilePermissions = [];
+	const resolvedPath = resolveWithBaseDir(relPath.toString());
+	const filePermissions: FilePermissions = [];
 
 	try {
 		await fs.access(resolvedPath, fs.constants.R_OK);
-		filePermisions.push('read');
+		filePermissions.push('read');
 	} catch {}
 	try {
 		await fs.access(resolvedPath, fs.constants.W_OK);
-		filePermisions.push('write');
+		filePermissions.push('write');
 	} catch {}
-	if (filePermisions.length <= 0) {
+	if (filePermissions.length <= 0) {
 		return 'EACCES';
 	}
 
-	return filePermisions;
+	return filePermissions;
 }
 
-export async function writeFiles(type: FileTypesWithPreview) {
-	const baseDir = process.env.BASE_DIR || process.cwd();
+export async function downloadFile(filePath: string): Promise<downloadFileResult> {
+	const resolvedPath = resolveWithBaseDir(filePath.toString());
 
-	for (const file of fileTypeMap[type]) {
-		const relPath = `folder/${type}/${type}.${file}`;
-		const filePath = resolveWithBaseDir(baseDir, relPath);
+	if (!existsSync(resolvedPath)){
+		return {
+			error: true,
+			code: 'ENOENT',
+			msg: 'No such file or directory',
+		}
+	}
 
-		await fs.writeFile(filePath, 'Hi');
+	const fileStat = await fs.stat(resolvedPath);
+	const contentType = mime.lookup(resolvedPath) || 'application/octet-stream';
+	const stream = createReadStream(resolvedPath);
+
+	return {
+		error: false,
+		stream: stream as any,
+		contentType: contentType,
+		contentLength: fileStat.size,
 	}
 }

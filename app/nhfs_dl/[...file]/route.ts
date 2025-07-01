@@ -4,6 +4,7 @@ import path from 'path';
 import { NextRequest } from 'next/server';
 
 import { log } from '@/lib/log';
+import { downloadFile } from '@/lib/io';
 
 export async function GET(
 	req: NextRequest,
@@ -11,21 +12,26 @@ export async function GET(
 ) {
 	const filePath = path.join(...params.file);
 
-	log.debug("route.ts filePath:", params.file)
-
 	try {
-		const fileBuffer = await fs.readFile(filePath);
+
+		const fileData = await downloadFile(filePath);
+
+        if (!fileData.error){
 		const fileName = params.file[params.file.length - 1];
 
-        log.debug("route.ts: FilePath:", filePath)
-
-		return new Response(fileBuffer, {
+		return new Response(fileData.stream, {
 			headers: {
-				'Content-Type': 'application/octet-stream',
+				'Content-Type': fileData.contentType,
+                'Content-Length': fileData.contentLength.toString(),
 				'Content-Disposition': `attachment; filename="${fileName}"`,
 			},
 		});
-	} catch (err) {
+        }
+
+
+        log.debug("route.ts: FilePath:", filePath)
+
+	} catch {
 		return new Response('File not found', { status: 404 });
 	}
 }
