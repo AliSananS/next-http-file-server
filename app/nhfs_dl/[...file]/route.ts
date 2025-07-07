@@ -2,8 +2,8 @@ import path from 'path';
 
 import { downloadFile } from '@/lib/io';
 
-export async function GET({ params }: { params: { file: string[] } }) {
-	const { file } = await params;
+export async function GET(req: Request) {
+	const { file } = await req.query;
 	const filePath = path.join(...file);
 
 	try {

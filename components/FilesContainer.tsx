@@ -62,7 +62,6 @@ function ActionButtons() {
 }
 
 async function MainContent({ filesData }: { filesData: GetDataResult }) {
-    log.debug(filesData, 'FilesContainer');
 	if (filesData.kind === 'error') {
 		return <ErrorHandler error={filesData} />;
 	}
@@ -76,7 +75,7 @@ async function MainContent({ filesData }: { filesData: GetDataResult }) {
 	return (
 		<p>
 			Unsupported file.{' '}
-			<Link className="text-blue-500" href={`${filesData.path}dl=true`}>
+			<Link className="text-blue-500" href={`/${filesData.path}?dl=true`}>
 				Download
 			</Link>
 		</p>
@@ -85,7 +84,7 @@ async function MainContent({ filesData }: { filesData: GetDataResult }) {
 
 function FileViewer({ file }: { file: FileEntry }) {
 	if (file.type === 'image') {
-		return <ImageView src={`/${file.path}dl=true`} />;
+		return <ImageView src={`/${file.path}?dl=true`} />;
 	}
 }
 
