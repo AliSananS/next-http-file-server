@@ -3,7 +3,7 @@ import * as fs from 'node:fs/promises';
 import * as path from 'path';
 import { createReadStream } from 'node:fs';
 
-import mime from "mime-types";
+import mime from 'mime-types';
 
 import fileTypeMap from './fileTypeMap';
 
@@ -32,8 +32,6 @@ export async function getData(params: string[]): Promise<GetDataResult> {
 
 	log.debug('FILE:', filePath);
 	if (!existsSync(filePath)) {
-		log.info('File not found');
-
 		return {
 			kind: 'error',
 			errorCode: 'ENOENT',
@@ -61,7 +59,8 @@ export async function getData(params: string[]): Promise<GetDataResult> {
 			const childRelPath = path.join(relPath, file.name);
 			const fullPath = resolveWithBaseDir(childRelPath);
 
-			const filePermissions: FilePermissions = await checkFilePermissions(childRelPath);
+			const filePermissions: FilePermissions =
+				await checkFilePermissions(childRelPath);
 			const fileType: FileTypes = await checkFileType(childRelPath);
 
 			if (filePermissions === 'EACCES') {
@@ -86,11 +85,18 @@ export async function getData(params: string[]): Promise<GetDataResult> {
 			});
 		}
 
+		const sortedFiles = filesInDirectory.sort((a, b) => {
+			if (a.type === 'dir' && b.type !== 'dir') return -1;
+			if (a.type !== 'dir' && b.type === 'dir') return 1;
+
+			return a.name.localeCompare(b.name);
+		});
+
 		return {
 			kind: 'dir',
 			name: params[params.length - 1],
 			path: relPath,
-			children: filesInDirectory,
+			children: sortedFiles,
 		};
 	}
 
@@ -115,9 +121,7 @@ export async function getData(params: string[]): Promise<GetDataResult> {
 	};
 }
 
-export async function checkFileType(
-	relPath: string,
-): Promise<FileTypes> {
+export async function checkFileType(relPath: string): Promise<FileTypes> {
 	const resolvedPath = resolveWithBaseDir(relPath);
 	const fileStat = await fs.stat(resolvedPath);
 
@@ -163,15 +167,17 @@ export async function checkFilePermissions(
 	return filePermissions;
 }
 
-export async function downloadFile(filePath: string): Promise<downloadFileResult> {
+export async function downloadFile(
+	filePath: string,
+): Promise<downloadFileResult> {
 	const resolvedPath = resolveWithBaseDir(filePath.toString());
 
-	if (!existsSync(resolvedPath)){
+	if (!existsSync(resolvedPath)) {
 		return {
 			error: true,
 			code: 'ENOENT',
 			msg: 'No such file or directory',
-		}
+		};
 	}
 
 	const fileStat = await fs.stat(resolvedPath);
@@ -183,5 +189,5 @@ export async function downloadFile(filePath: string): Promise<downloadFileResult
 		stream: stream as any,
 		contentType: contentType,
 		contentLength: fileStat.size,
-	}
+	};
 }

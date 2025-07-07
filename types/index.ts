@@ -51,18 +51,18 @@ export type GetDataResult =
 
 export type FilePermissions = ['read'?, 'write'?, 'execute'?] | 'EACCES';
 
-export type downloadFileSuccess= {
-	error: false,
-	stream: any,
-	contentType: string,
-	contentLength: number,
-}
+export type downloadFileSuccess = {
+	error: false;
+	stream: any;
+	contentType: string;
+	contentLength: number;
+};
 
 export type downloadFileError = {
-	error: true,
-	code: FileErrorTypes,
-	msg: string,
-}
+	error: true;
+	code: FileErrorTypes;
+	msg: string;
+};
 
 export type downloadFileResult = downloadFileSuccess | downloadFileError;
 
@@ -71,4 +71,3 @@ export type BreadcrumbsItemsProps = {
 	path: string;
 	type?: 'file' | 'dir';
 }[];
-

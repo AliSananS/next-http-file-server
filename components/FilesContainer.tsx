@@ -1,5 +1,3 @@
-import path from 'path';
-
 import { Button } from '@heroui/button';
 import React from 'react';
 import { Divider } from '@heroui/divider';
@@ -12,8 +10,8 @@ import FilesList from '@/components/FilesList';
 import { FileErrorMap } from '@/components/FileErrorMap';
 import createBreadcrumbsData from '@/lib/createBreadcrumbsData';
 import fileTypeMap from '@/lib/fileTypeMap';
-import { log } from '@/lib/log';
 import ImageView from '@/components/ImageView';
+import {log} from "@/lib/log";
 
 export default async function FilesContainer({
 	filesData,
@@ -64,24 +62,21 @@ function ActionButtons() {
 }
 
 async function MainContent({ filesData }: { filesData: GetDataResult }) {
+    log.debug(filesData, 'FilesContainer');
 	if (filesData.kind === 'error') {
 		return <ErrorHandler error={filesData} />;
 	}
 	if (filesData.kind === 'dir') {
 		return <FilesList files={filesData} />;
 	}
-	if (
-		filesData.kind === 'file' &&
-		filesData.type &&
-		fileTypeMap.hasOwnProperty(filesData.type)
-	) {
+	if (filesData.kind === 'file' && fileTypeMap.hasOwnProperty(filesData.type)) {
 		return <FileViewer file={filesData} />;
 	}
 
 	return (
 		<p>
 			Unsupported file.{' '}
-			<Link className="text-blue-500" href={`${filesData.path}?dl=true`}>
+			<Link className="text-blue-500" href={`${filesData.path}dl=true`}>
 				Download
 			</Link>
 		</p>
@@ -90,13 +85,7 @@ async function MainContent({ filesData }: { filesData: GetDataResult }) {
 
 function FileViewer({ file }: { file: FileEntry }) {
 	if (file.type === 'image') {
-		const imgURL = `${file.path}?dl=true`;
-
-        log.debug("imageURL:", imgURL)
-
-		log.debug('imgURL:', imgURL);
-
-		return <ImageView src={imgURL} />;
+		return <ImageView src={`/${file.path}dl=true`} />;
 	}
 }
 

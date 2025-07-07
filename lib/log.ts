@@ -28,7 +28,7 @@ function formatLabel(level: LogLevel) {
 		case 'debug':
 			return `${color.blue}[DEBUG] ${color.dim}${color.reset}`;
 		case 'info':
-			return `${color.green} [INFO] ${color.dim}${color.reset}`;
+			return `${color.green}[INFO] ${color.dim}${color.reset}`;
 		case 'warn':
 			return `${color.yellow}[WARN] ${color.dim}${color.reset}`;
 		case 'error':
