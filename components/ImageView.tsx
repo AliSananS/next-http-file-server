@@ -15,7 +15,7 @@ type ImageViewProps = {
 };
 
 function ImageView({ src, alt, fileName, className }: ImageViewProps) {
-  const [loading, setLoading] = React.useState(true);
+	const [loading, setLoading] = React.useState(true);
 	const [error, setError] = React.useState(false);
 
 	return (

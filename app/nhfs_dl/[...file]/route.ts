@@ -1,36 +1,25 @@
-import * as fs from 'node:fs/promises';
 import path from 'path';
 
-import { NextRequest } from 'next/server';
-
-import { log } from '@/lib/log';
 import { downloadFile } from '@/lib/io';
 
-export async function GET(
-	req: NextRequest,
-	{ params }: { params: { file: string[] } },
-) {
-	const filePath = path.join(...params.file);
+export async function GET({ params }: { params: { file: string[] } }) {
+	const { file } = await params;
+	const filePath = path.join(...file);
 
 	try {
-
 		const fileData = await downloadFile(filePath);
 
-        if (!fileData.error){
-		const fileName = params.file[params.file.length - 1];
+		if (!fileData.error) {
+			const fileName = file[file.length - 1];
 
-		return new Response(fileData.stream, {
-			headers: {
-				'Content-Type': fileData.contentType,
-                'Content-Length': fileData.contentLength.toString(),
-				'Content-Disposition': `attachment; filename="${fileName}"`,
-			},
-		});
-        }
-
-
-        log.debug("route.ts: FilePath:", filePath)
-
+			return new Response(fileData.stream, {
+				headers: {
+					'Content-Type': fileData.contentType,
+					'Content-Length': fileData.contentLength.toString(),
+					'Content-Disposition': `attachment; filename="${fileName}"`,
+				},
+			});
+		}
 	} catch {
 		return new Response('File not found', { status: 404 });
 	}
