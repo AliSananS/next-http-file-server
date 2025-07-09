@@ -110,6 +110,7 @@ export const MenuDotsIcon = ({
 			{...props}
 			weight="Outline"
 			{...props}
+			className="rotate-90"
 		/>
 	);
 };
