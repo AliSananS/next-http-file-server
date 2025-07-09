@@ -11,7 +11,7 @@ import { FileErrorMap } from '@/components/FileErrorMap';
 import createBreadcrumbsData from '@/lib/createBreadcrumbsData';
 import fileTypeMap from '@/lib/fileTypeMap';
 import ImageView from '@/components/ImageView';
-import {log} from "@/lib/log";
+import VideoPlayer from '@/components/VideoPlayer';
 
 export default async function FilesContainer({
 	filesData,
@@ -69,7 +69,11 @@ async function MainContent({ filesData }: { filesData: GetDataResult }) {
 		return <FilesList files={filesData} />;
 	}
 	if (filesData.kind === 'file' && fileTypeMap.hasOwnProperty(filesData.type)) {
-		return <FileViewer file={filesData} />;
+		return (
+			<div className="flex h-full w-full items-center justify-center">
+				<FileViewer file={filesData} />
+			</div>
+		);
 	}
 
 	return (
@@ -83,8 +87,13 @@ async function MainContent({ filesData }: { filesData: GetDataResult }) {
 }
 
 function FileViewer({ file }: { file: FileEntry }) {
+	const fileUrl = `/${file.path}?dl=true`;
+
 	if (file.type === 'image') {
-		return <ImageView src={`/${file.path}?dl=true`} />;
+		return <ImageView src={fileUrl} />;
+	}
+	if (file.type === 'video') {
+		return <VideoPlayer src={fileUrl} />;
 	}
 }
 

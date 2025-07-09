@@ -8,7 +8,7 @@ export default async function Home() {
 	const baseDirectoryPath = process.env.BASE_DIR;
 
 	return (
-		<section className="">
+		<section>
 			<ShowFiles params={['./']} />
 		</section>
 	);

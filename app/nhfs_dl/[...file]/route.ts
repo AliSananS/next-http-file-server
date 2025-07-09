@@ -1,9 +1,14 @@
 import path from 'path';
 
+import { NextApiRequest } from 'next';
+
 import { downloadFile } from '@/lib/io';
 
-export async function GET(req: Request) {
-	const { file } = await req.query;
+export async function GET(
+	req: NextApiRequest,
+	{ params }: { params: Promise<{ file: string[] }> },
+) {
+	const { file } = await params;
 	const filePath = path.join(...file);
 
 	try {
