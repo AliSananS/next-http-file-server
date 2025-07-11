@@ -1,11 +1,11 @@
 import path from 'path';
 
-import { NextApiRequest } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 
 import { downloadFile } from '@/lib/io';
 
 export async function GET(
-	req: NextApiRequest,
+	req: NextRequest,
 	{ params }: { params: Promise<{ file: string[] }> },
 ) {
 	const { file } = await params;
