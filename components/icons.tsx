@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { SSR } from '@solar-icons/react';
+import { IconProps, SSR as SIcons } from '@solar-icons/react';
 
 const {
 	FolderWithFiles,
@@ -13,207 +13,126 @@ const {
 	FolderError,
 	DangerCircle,
 	Home,
-} = SSR;
+	DownloadMinimalistic,
+	TrashBinTrash,
+	InfoCircle,
+} = SIcons;
 
 import { IconSvgProps } from '@/types';
 //@ts-ignore
 
-export const Logo = ({
-	size,
-	color,
-	...props
-}: {
-	size?: number;
-	color?: string;
-}) => {
-	return (
-		<FolderWithFiles color={color} size={size} {...props} weight="Outline" />
-	);
+export const Logo = (props: IconProps) => {
+	return <FolderWithFiles {...props} weight="Outline" />;
 };
 
-export const SettingsIcon = ({
-	size,
-	color,
-	...props
-}: {
-	size?: number;
-	color?: string;
-}) => {
+export const SettingsIcon = (props: IconProps) => {
 	return (
 		<Settings
 			className="cursor-pointer hover:opacity-75"
-			color={color}
-			size={size}
 			{...props}
 			weight="Outline"
 		/>
 	);
 };
 
-export const UploadIcon = ({
-	size,
-	color,
-	...props
-}: {
-	size?: number;
-	color?: string;
-}) => {
-	return (
-		<Upload color={color} size={size} {...props} weight="Outline" {...props} />
-	);
+export const UploadIcon = (props: IconProps) => {
+	return <Upload {...props} weight="Outline" />;
 };
 
-export const AddFolderIcon = ({
-	size,
-	color,
-	...props
-}: {
-	size?: number;
-	color?: string;
-}) => {
-	return (
-		<AddFolder
-			color={color}
-			size={size}
-			{...props}
-			weight="Outline"
-			{...props}
-		/>
-	);
-};
-export const FolderIcon = ({
-	size,
-	color,
-	...props
-}: {
-	size?: number;
-	color?: string;
-}) => {
-	return (
-		<Folder color={color} size={size} {...props} weight="Outline" {...props} />
-	);
+export const AddFolderIcon = (props: IconProps) => {
+	return <AddFolder {...props} weight="Outline" />;
 };
 
-export const MenuDotsIcon = ({
-	size,
-	color,
-	...props
-}: {
-	size?: number;
-	color?: string;
-}) => {
-	return (
-		<MenuDots
-			color={color}
-			fill={color}
-			size={size}
-			{...props}
-			weight="Outline"
-			{...props}
-			className="rotate-90"
-		/>
-	);
+export const FolderIcon = (props: IconProps) => {
+	return <Folder {...props} weight="Outline" />;
 };
 
-export const FileIcon = ({
-	size,
-	color,
-	...props
-}: {
-	size?: number;
-	color?: string;
-}) => {
-	return (
-		<File
-			color={color}
-			fill={color}
-			size={size}
-			{...props}
-			weight="Outline"
-			{...props}
-		/>
-	);
+export const MenuDotsIcon = (props: IconProps) => {
+	return <MenuDots {...props} weight="Bold" />;
 };
 
-export const FileRightIcon = ({
-	size,
-	color,
-	...props
-}: {
-	size?: number;
-	color?: string;
-}) => {
-	return (
-		<FileRight
-			color={color}
-			fill={color}
-			size={size}
-			{...props}
-			weight="Outline"
-			{...props}
-		/>
-	);
+export const FileIcon = (props: IconProps) => {
+	return <File {...props} weight="Outline" />;
 };
 
-export const FolderErrorIcon = ({
-	size,
-	color,
-	...props
-}: {
-	size?: number;
-	color?: string;
-}) => {
-	return (
-		<FolderError
-			color={color}
-			fill={color}
-			size={size}
-			{...props}
-			weight="Outline"
-			{...props}
-		/>
-	);
+export const FileRightIcon = (props: IconProps) => {
+	return <FileRight {...props} weight="Outline" />;
 };
 
-export const ErrorIcon = ({
-	size,
-	color,
-	...props
-}: {
-	size?: number;
-	color?: string;
-}) => {
-	return (
-		<DangerCircle
-			color={color}
-			fill={color}
-			size={size}
-			{...props}
-			weight="Outline"
-			{...props}
-		/>
-	);
+export const FolderErrorIcon = (props: IconProps) => {
+	return <FolderError {...props} weight="Outline" />;
 };
 
-export const HomeIcon = ({
-	size,
-	color,
-	...props
-}: {
-	size?: number;
-	color?: string;
-}) => {
-	return (
-		<Home
-			color={color}
-			fill={color}
-			size={size}
-			{...props}
-			weight="Outline"
-			{...props}
-		/>
-	);
+export const ErrorIcon = (props: IconProps) => {
+	return <DangerCircle {...props} weight="Outline" />;
 };
+
+export const HomeIcon = (props: IconProps) => {
+	return <Home {...props} weight="Outline" />;
+};
+
+export const DownloadIcon = (props: IconProps) => {
+	return <DownloadMinimalistic {...props} />;
+};
+
+export const DeleteIcon = (props: IconProps) => {
+	return <TrashBinTrash {...props} weight="Outline" />;
+};
+
+export const InfoIcon = (props: IconProps) => {
+	return <InfoCircle {...props} weight="Outline" />;
+};
+
+export function RenameIcon({ size, color }: { size?: number; color?: string }) {
+	return (
+		<svg
+			fill="none"
+			style={{ width: size || 'auto', height: size || 'auto' }}
+			viewBox="0 0 24 24"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M9.75 2h3.998a.75.75 0 0 1 .102 1.493l-.102.007H12.5v17h1.245a.75.75 0 0 1 .743.648l.007.102a.75.75 0 0 1-.648.743l-.102.007H9.75a.75.75 0 0 1-.102-1.493l.102-.007H11v-17H9.75a.75.75 0 0 1-.743-.648L9 2.75a.75.75 0 0 1 .648-.743L9.75 2h3.998H9.75Zm8.496 2.997a3.253 3.253 0 0 1 3.25 3.25l.004 7.504a3.249 3.249 0 0 1-3.064 3.246l-.186.005h-4.745v-1.5h4.803A1.749 1.749 0 0 0 20 15.751l-.003-7.505a1.753 1.753 0 0 0-1.752-1.75h-4.74v-1.5h4.74Zm-8.246 0v1.5H5.25a1.75 1.75 0 0 0-1.75 1.75v7.504c0 .967.784 1.75 1.75 1.75h4.745v1.5H5.25A3.25 3.25 0 0 1 2 15.751V8.247a3.25 3.25 0 0 1 3.25-3.25H10Z"
+				fill="#ffffff"
+			/>
+		</svg>
+	);
+}
+
+export function CopyIcon({ size, color }: { size?: number; color?: string }) {
+	return (
+		<svg
+			fill="none"
+			style={{ width: size || 'auto', height: size || 'auto' }}
+			viewBox="0 0 24 24"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M5.503 4.627 5.5 6.75v10.504a3.25 3.25 0 0 0 3.25 3.25h8.616a2.251 2.251 0 0 1-2.122 1.5H8.75A4.75 4.75 0 0 1 4 17.254V6.75c0-.98.627-1.815 1.503-2.123ZM17.75 2A2.25 2.25 0 0 1 20 4.25v13a2.25 2.25 0 0 1-2.25 2.25h-9a2.25 2.25 0 0 1-2.25-2.25v-13A2.25 2.25 0 0 1 8.75 2h9Zm0 1.5h-9a.75.75 0 0 0-.75.75v13c0 .414.336.75.75.75h9a.75.75 0 0 0 .75-.75v-13a.75.75 0 0 0-.75-.75Z"
+				fill="#ffffff"
+			/>
+		</svg>
+	);
+}
+export function CutIcon({ size, color }: { size?: number; color?: string }) {
+	return (
+		<svg
+			fill="none"
+			style={{ width: size || 'auto', height: size || 'auto' }}
+			viewBox="0 0 24 24"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path
+				d="M12.14 9.341v.002L7.37 2.328a.75.75 0 1 0-1.24.844l5.13 7.545-2.395 3.743a4 4 0 1 0 1.178.943l2.135-3.337 2.065 3.036a4 4 0 1 0 1.261-.813l-2.447-3.597.002-.002-.918-1.348Zm-7.64 8.66a2.5 2.5 0 1 1 5 0 2.5 2.5 0 0 1-5 0Zm10 0a2.5 2.5 0 1 1 5 0 2.5 2.5 0 0 1-5 0Z"
+				fill="#ffffff"
+			/>
+			<path
+				d="m13.938 9.316 3.943-6.162a.75.75 0 1 0-1.263-.808L13.02 7.968l.918 1.348Z"
+				fill="#ffffff"
+			/>
+		</svg>
+	);
+}
 
 export const DiscordIcon: React.FC<IconSvgProps> = ({
 	size = 24,

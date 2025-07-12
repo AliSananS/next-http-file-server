@@ -1,19 +1,10 @@
-import { existsSync, PathLike } from 'fs';
+import { existsSync, PathLike } from 'node:fs';
 import * as fs from 'node:fs/promises';
 import * as path from 'path';
-import { createReadStream } from 'node:fs';
-
-import mime from 'mime-types';
 
 import fileTypeMap from './fileTypeMap';
 
-import {
-	downloadFileResult,
-	FileEntry,
-	FilePermissions,
-	FileTypes,
-	GetDataResult,
-} from '@/types';
+import { FileEntry, FilePermissions, FileTypes, GetDataResult } from '@/types';
 import { log } from '@/lib/log';
 
 const baseDir = process.env.BASE_DIR || process.cwd();
@@ -167,27 +158,69 @@ export async function checkFilePermissions(
 	return filePermissions;
 }
 
-export async function downloadFile(
-	filePath: string,
-): Promise<downloadFileResult> {
-	const resolvedPath = resolveWithBaseDir(filePath.toString());
+export async function deleteFile(
+	relPath: string,
+	{ force, recursive }: { force?: boolean; recursive: boolean } = {
+		force: false,
+		recursive: true,
+	},
+): Promise<boolean> {
+	const resolvedPath = resolveWithBaseDir(relPath);
 
 	if (!existsSync(resolvedPath)) {
-		return {
-			error: true,
-			code: 'ENOENT',
-			msg: 'No such file or directory',
-		};
+		return false;
 	}
 
-	const fileStat = await fs.stat(resolvedPath);
-	const contentType = mime.lookup(resolvedPath) || 'application/octet-stream';
-	const stream = createReadStream(resolvedPath);
+	try {
+		await fs.rm(resolvedPath, { force, recursive });
 
-	return {
-		error: false,
-		stream: stream as any,
-		contentType: contentType,
-		contentLength: fileStat.size,
-	};
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+export async function moveFile(
+	source: string,
+	destination: string,
+	{ force }: { force?: boolean } = { force: false },
+): Promise<boolean> {
+	const sourcePath = resolveWithBaseDir(source);
+	const destinationPath = resolveWithBaseDir(destination);
+
+	if (!existsSync(sourcePath)) {
+		return false;
+	}
+
+	try {
+		await fs.rename(sourcePath, destinationPath);
+
+		return true;
+	} catch (error) {
+		log.error('Error moving file:', error);
+
+		return false;
+	}
+}
+
+export async function copyFile(
+	source: string,
+	destination: string,
+): Promise<boolean> {
+	const sourcePath = resolveWithBaseDir(source);
+	const destinationPath = resolveWithBaseDir(destination);
+
+	if (!existsSync(sourcePath)) {
+		return false;
+	}
+
+	try {
+		await fs.copyFile(sourcePath, destinationPath);
+
+		return true;
+	} catch (error) {
+		log.error('Error copying file:', error);
+
+		return false;
+	}
 }

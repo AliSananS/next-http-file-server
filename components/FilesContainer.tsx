@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 import { Button } from '@heroui/button';
 import React from 'react';
 import { Divider } from '@heroui/divider';
@@ -87,7 +89,7 @@ async function MainContent({ filesData }: { filesData: GetDataResult }) {
 }
 
 function FileViewer({ file }: { file: FileEntry }) {
-	const fileUrl = `/${file.path}?dl=true`;
+	const fileUrl = path.join('/nhfs_dl', file.path);
 
 	if (file.type === 'image') {
 		return <ImageView src={fileUrl} />;
