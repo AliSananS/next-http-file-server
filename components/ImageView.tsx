@@ -14,13 +14,18 @@ type ImageViewProps = {
 	className?: string;
 };
 
-function ImageView({ src, alt, fileName, className }: ImageViewProps) {
+export default function ImageView({
+	src,
+	alt,
+	fileName,
+	className,
+}: ImageViewProps) {
 	const [loading, setLoading] = React.useState(true);
 	const [error, setError] = React.useState(false);
 
 	return (
 		<Card
-			className={`min-h-fit w-full min-w-fit max-w-full rounded-xl border-1 border-solid border-divider bg-white dark:bg-black ${className || ''}`}
+			className={`min-h-full w-full min-w-full max-w-full rounded-xl border-1 border-solid border-divider bg-white dark:bg-black ${className || ''}`}
 		>
 			{fileName && (
 				<CardHeader>
@@ -31,45 +36,49 @@ function ImageView({ src, alt, fileName, className }: ImageViewProps) {
 			)}
 			<CardBody className="flex flex-col items-center justify-center p-0">
 				<div className="relative flex min-h-64 w-full items-center justify-center overflow-auto">
-					{loading && !error && (
-						<div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-default-100/50">
-							<Spinner color="primary" size="lg" />
-						</div>
-					)}
-					{error ? (
-						<div className="text-center text-danger-600">
-							<p>Failed to load image.</p>
-						</div>
-					) : (
-						<div className="flex h-full max-h-full w-full max-w-full items-center justify-center overflow-hidden">
-							<Image
-								unoptimized
-								alt={alt || fileName || 'Image'}
-								className={`shadow ${loading ? 'invisible' : 'visible'}`}
-								draggable={false}
-								height={0}
-								sizes="100vw"
-								src={src}
-								style={{
-									maxWidth: '100%',
-									maxHeight: '100%',
-									height: 'auto',
-									width: 'auto',
-									display: loading ? 'none' : 'block',
-								}}
-								width={0}
-								onError={() => {
-									setLoading(false);
-									setError(true);
-								}}
-								onLoad={() => setLoading(false)}
-							/>
-						</div>
-					)}
+					<div className="flex h-full max-h-full w-full max-w-full items-center justify-center overflow-hidden">
+						{/* eslint-disable-next-line @next/next/no-img-element */}
+						<img
+							// unoptimized
+							alt={alt || fileName || 'Image'}
+							// className={`shadow ${loading ? 'invisible' : 'visible'}`}
+							draggable={false}
+							// height={0}
+							// sizes="100vw"
+							src={src}
+							// style={{
+							// 	maxWidth: '100%',
+							// 	maxHeight: '100%',
+							// 	height: 'auto',
+							// 	width: 'auto',
+							// 	display: loading ? 'none' : 'block',
+							// }}
+							// width={0}
+							onError={() => {
+								setLoading(false);
+								setError(true);
+							}}
+							onLoad={() => setLoading(false)}
+						/>
+					</div>
 				</div>
 			</CardBody>
 		</Card>
 	);
 }
 
-export default ImageView;
+function Loading() {
+	return (
+		<div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-default-100/50">
+			<Spinner color="primary" size="lg" />
+		</div>
+	);
+}
+
+function Error() {
+	return (
+		<div className="text-center text-danger-600">
+			<p>Failed to load image.</p>
+		</div>
+	);
+}

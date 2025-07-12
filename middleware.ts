@@ -8,7 +8,7 @@ export function middleware(req: NextRequest) {
 	if (isDownload) {
 		// Rewrite to internal API route, keep path
 		url.pathname = `nhfs_dl${url.pathname}`;
-		url.searchParams.delete('dl'); // optional cleanup
+		// url.searchParams.delete('dl'); // optional cleanup
 
 		return NextResponse.rewrite(url);
 	}

@@ -53,7 +53,7 @@ export type FilePermissions = ['read'?, 'write'?, 'execute'?] | 'EACCES';
 
 export type downloadFileSuccess = {
 	error: false;
-	stream: any;
+	content: any;
 	contentType: string;
 	contentLength: number;
 };

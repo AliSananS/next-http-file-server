@@ -20,7 +20,7 @@ export default function BreadCrumbs({
 			<BreadcrumbItem
 				key="BASE_DIR"
 				href="/"
-				isCurrent={items.length === 1}
+				isCurrent={items.length < 1}
 				startContent={<HomeIcon />}
 			>
 				{''}
