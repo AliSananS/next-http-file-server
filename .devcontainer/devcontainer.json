@@ -29,7 +29,9 @@
 				"formulahendry.auto-close-tag",
 				"formulahendry.auto-rename-tag",
 				"christian-kohler.path-intellisense",
-				"usernamehw.error-lens"
+				"usernamehw.error-lens",
+				"vscode-icons-team.vscode-icons",
+				"rvest.vs-code-prettier-eslint"
 			],
 			"settings": {
 				"editor.formatOnSave": true,
