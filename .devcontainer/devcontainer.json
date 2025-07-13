@@ -1,7 +1,7 @@
 { 
 	"name": "Next.js devcontainer",
 	"build": {
-		"dockerfile": "Dockerfile",
+		"dockerfile": "Dockerfile"
 	},
 	"hostRequirements": {
 		"cpus": 4
