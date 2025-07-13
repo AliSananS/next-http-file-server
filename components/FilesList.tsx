@@ -77,7 +77,7 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
 			<div className="flex h-full w-8 items-center justify-center from-content1 to-content2 hover:cursor-pointer hover:bg-gradient-to-r">
 				<Dropdown backdrop="blur">
 					<DropdownTrigger className="active:border-none">
-						{/* @ts-ignore //Ignore className error. Idk why it's showing. but className is working fine. */}
+						{/* @ts-ignore //Ignore className error. */}
 						<MenuDotsIcon
 							className="rotate-90 text-default-500 focus:outline-none"
 							focusable={false}
@@ -89,10 +89,10 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
 								<DropdownItem
 									key="download"
 									className="hover:bg-primary-50"
-									description={`Download ${fileType}`}
+									// description={`Download ${fileType}`}
 									startContent={<DownloadIcon weight="BoldDuotone" />}
 									onClick={() => {
-										window.location.href = path.join('/nhfs_dl', file.path);
+										window.location.href = file.path + '?dl=true';
 									}}
 								>
 									Download
@@ -100,25 +100,11 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
 							) : (
 								<></>
 							)}
-							<DropdownItem
-								key="rename"
-								className="select-none"
-								description={`Rename ${fileType}`}
-								startContent={
-									<div className="h-4 w-4">
-										<RenameIcon />
-									</div>
-								}
-								onClick={() => {
-									// moveFileAction(file.path);
-								}}
-							>
-								Rename
-							</DropdownItem>
+
 							<DropdownItem
 								key="copy"
 								className="select-none"
-								description={`Copy ${fileType} to`}
+								// description={`Copy ${fileType} to`}
 								startContent={
 									<div className="h-4 w-4">
 										<CopyIcon />
@@ -130,10 +116,11 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
 							>
 								Copy
 							</DropdownItem>
+
 							<DropdownItem
 								key="move"
 								className="select-none"
-								description={`Move ${fileType} to`}
+								// description={`Move ${fileType} to`}
 								startContent={
 									<div className="h-4 w-4">
 										<CutIcon />
@@ -145,9 +132,31 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
 							>
 								Move
 							</DropdownItem>
+
+							<DropdownItem
+								key="rename"
+								className="select-none"
+								// description={`Rename ${fileType}`}
+								startContent={
+									<div className="h-4 w-4">
+										<RenameIcon />
+									</div>
+								}
+								onClick={() => {
+									// moveFileAction(file.path);
+								}}
+							>
+								Rename
+							</DropdownItem>
 						</DropdownSection>
 						<DropdownSection showDivider title="Danger Zone">
 							<DropdownItem
+								className='text-danger-500'
+								classNames={
+									{
+										description: 'text-danger-500',
+									}
+								}
 								key="delete"
 								color="danger"
 								description={`Permanently delete ${fileType}`}
@@ -163,7 +172,7 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
 						<DropdownSection>
 							<DropdownItem
 								key="info"
-								description="File information"
+								// description="File information"
 								startContent={<InfoIcon />}
 							>
 								Info
