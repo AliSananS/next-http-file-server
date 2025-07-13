@@ -31,6 +31,7 @@
 		"@heroui/system": "2.4.17",
 		"@heroui/table": "^2.2.20",
 		"@heroui/theme": "2.4.17",
+		"@heroui/toast": "^2.0.12",
 		"@react-aria/ssr": "3.9.9",
 		"@react-aria/visually-hidden": "3.8.24",
 		"@solar-icons/react": "^1.0.1",

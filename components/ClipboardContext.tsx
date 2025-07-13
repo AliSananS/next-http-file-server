@@ -5,7 +5,9 @@ import { createContext, useContext, useState } from 'react';
 
 type ClipboardItem = {
     path: string;
+    name?: string;
     type?: 'file' | 'dir';
+    mode: 'copy' | 'move';
 };
 
 type ClipboardContextType = {

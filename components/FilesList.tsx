@@ -10,6 +10,8 @@ import {
 	DropdownTrigger,
 } from '@heroui/dropdown';
 
+import { addToast } from "@heroui/toast";
+
 import {
 	CopyIcon,
 	CutIcon,
@@ -26,6 +28,9 @@ import {
 	copyFileAction,
 	moveFileAction,
 } from '@/app/nhfs_actions/route';
+
+import { useClipboard } from '@/components/ClipboardContext';
+import { log } from '@/lib/log';
 
 export default function FilesList({ files }: { files: DirEntery }) {
 	return (
@@ -71,6 +76,7 @@ const LeftWrapper = ({
 
 const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
 	const fileType = file.type === 'dir' ? 'folder' : 'file';
+	const { copy } = useClipboard();
 
 	return (
 		<div className="flex flex-row items-center">
@@ -110,8 +116,21 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
 										<CopyIcon />
 									</div>
 								}
-								onClick={() => {
-									// TODO: Implement copy logic
+								onPress={() => {
+									alert('Copying');
+									copy(
+										{
+											path: file.path,
+											type: file.type === 'dir' ? 'dir' : 'file',
+											name: file.name,
+											mode: 'copy',
+										}
+									);
+									addToast({
+										title: 'Copied',
+										description: `${file.name} copied to clipboard`,
+										color: 'default',
+									})
 								}}
 							>
 								Copy
@@ -127,7 +146,14 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
 									</div>
 								}
 								onClick={() => {
-									// TODO: Implement move logic
+									copy(
+										{
+											path: file.path,
+											type: file.type === 'dir' ? 'dir' : 'file',
+											name: file.name,
+											mode: 'move',
+										}
+									);
 								}}
 							>
 								Move
