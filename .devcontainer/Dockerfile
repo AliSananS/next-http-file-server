@@ -9,9 +9,12 @@ RUN apk add --no-cache \
     curl \
     fish \
     unzip \
+    bash \
+    sudo \
     github-cli
 
 CMD ["/usr/bin/fish"]
+
 
 # Create a non-root user
 ARG USERNAME=dev
@@ -21,3 +24,6 @@ RUN adduser -D $USERNAME && \
 USER $USERNAME
 WORKDIR /workspace/next-http-file-server
 
+RUN curl -fsSL https://bun.com/install | bash
+
+ENV PATH="${PATH}:/home/dev/.bun/bin"
