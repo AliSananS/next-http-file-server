@@ -110,7 +110,7 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
 									</div>
 								}
 								onClick={() => {
-									moveFileAction(file.path);
+									// moveFileAction(file.path);
 								}}
 							>
 								Rename
