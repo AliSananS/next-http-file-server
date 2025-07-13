@@ -6,17 +6,17 @@
  */
 
 export function shrtn(name: string, maxLength = 24): string {
-	if (name.length <= maxLength) return name;
+  if (name.length <= maxLength) return name;
 
-	const extIndex = name.lastIndexOf('.');
-	const hasExt = extIndex !== -1 && extIndex !== 0;
+  const extIndex = name.lastIndexOf('.');
+  const hasExt = extIndex !== -1 && extIndex !== 0;
 
-	const extension = hasExt ? name.slice(extIndex) : '';
-	const baseName = hasExt ? name.slice(0, extIndex) : name;
+  const extension = hasExt ? name.slice(extIndex) : '';
+  const baseName = hasExt ? name.slice(0, extIndex) : name;
 
-	const visibleLength = maxLength - extension.length - 3; // 3 for "..."
-	const front = Math.ceil(visibleLength / 2);
-	const back = Math.floor(visibleLength / 2);
+  const visibleLength = maxLength - extension.length - 3; // 3 for "..."
+  const front = Math.ceil(visibleLength / 2);
+  const back = Math.floor(visibleLength / 2);
 
-	return `${baseName.slice(0, front)}...${baseName.slice(-back)}${extension}`;
+  return `${baseName.slice(0, front)}...${baseName.slice(-back)}${extension}`;
 }
