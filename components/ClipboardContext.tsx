@@ -35,7 +35,9 @@ export function ClipboardProvider({ children }: { children: React.ReactNode }) {
 
 export function useClipboard() {
   const context = useContext(ClipboardContext);
+
   if (!context)
     throw new Error('useClipboard must be used within ClipboardProvider');
+
   return context;
 }
