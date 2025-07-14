@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { ThemeProvider as NextThemesProvider } from 'next-themes';
 import { ToastProvider } from '@heroui/toast';
 
-import { ClipboardProvider } from '@/components/ClipboardContext';
+import { ClipboardProvider } from '@/hooks/ClipboardContext';
 
 export interface ProvidersProps {
   children: React.ReactNode;

@@ -209,13 +209,41 @@ export async function copyFile(
 ): Promise<boolean> {
   const sourcePath = resolveWithBaseDir(source);
   const destinationPath = resolveWithBaseDir(destination);
+  const destinationDir = path.dirname(destinationPath);
+  log.debug("src:", sourcePath, "dest:", destinationPath);
+
+  const sourcePermisions = await checkFilePermissions(sourcePath);
+  const destinationPermisions = await checkFilePermissions(destinationDir);
+  log.debug("destDir:", destinationDir, "destFile:", destinationPath)
+  log.debug("Permisions: src:", sourcePermisions, "dest:", destinationPermisions);
+
+  if (!sourcePath){
+    log.error("copyFile: sourcePath is undefined");
+    return false;
+  }
+  if (!destinationPath){
+    log.error("copyFile: destinationPath is undefined");
+    return false;
+  }
+
+  if (!sourcePermisions.includes("read")){
+    log.info(sourcePath, ":sourcePath No read permision");
+
+    return false;
+  }
+  if (!destinationPermisions.includes("write")){
+    log.info(destinationDir, ": destinationPath No write permision");
+
+    return false;
+  }
 
   if (!existsSync(sourcePath)) {
     return false;
   }
 
   try {
-    await fs.copyFile(sourcePath, destinationPath);
+    await fs.cp(sourcePath, destinationPath, { recursive: true });
+    log.debug(`fs.cp: src:${sourcePath} dest:${destinationPath}`);
 
     return true;
   } catch (error) {

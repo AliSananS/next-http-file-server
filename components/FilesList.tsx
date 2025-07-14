@@ -27,8 +27,7 @@ import {
   copyFileAction,
   moveFileAction,
 } from '@/app/nhfs_actions/route';
-import { useClipboard } from '@/components/ClipboardContext';
-import { log } from '@/lib/log';
+import { useClipboard } from '@/hooks/ClipboardContext';
 
 export default function FilesList({ files }: { files: DirEntery }) {
   return (

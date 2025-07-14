@@ -1,9 +1,9 @@
 import path from 'node:path';
 
-import { Button } from '@heroui/button';
 import React from 'react';
 import { Divider } from '@heroui/divider';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 import {
   AddFolderIcon,
@@ -19,7 +19,8 @@ import createBreadcrumbsData from '@/lib/createBreadcrumbsData';
 import fileTypeMap from '@/lib/fileTypeMap';
 import ImageView from '@/components/ImageView';
 import VideoPlayer from '@/components/VideoPlayer';
-import { useClipboard } from '@/components/ClipboardContext';
+import { useClipboard } from '@/hooks/ClipboardContext';
+import { ActionButtons } from '@/components/ClientComponents';
 
 export default async function FilesContainer({
   filesData,
@@ -42,36 +43,6 @@ function HeaderSection({ breadCrumbsData }: { breadCrumbsData: any }) {
     <div className="flex w-full items-center justify-between">
       <Breadcrumbs items={breadCrumbsData} />
       <ActionButtons />
-    </div>
-  );
-}
-
-function ActionButtons() {
-  const { item } = useClipboard();
-
-  return (
-    <div className="flex gap-2">
-      {item !== null && (
-        <Button
-          className="mr-2"
-          color="default"
-          size="sm"
-          startContent={<PasteIcon size={16} />}
-        >
-          Paste
-        </Button>
-      )}
-      <Button
-        color="default"
-        endContent={<AddFolderIcon size={16} />}
-        size="sm"
-        variant="light"
-      >
-        New folder
-      </Button>
-      <Button color="primary" endContent={<UploadIcon size={16} />} size="sm">
-        Upload
-      </Button>
     </div>
   );
 }
