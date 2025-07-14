@@ -20,7 +20,7 @@ import {
   MenuDotsIcon,
   RenameIcon,
 } from '@/components/icons';
-import { DirEntery } from '@/types';
+import { DirEntery, FileEntry } from '@/types';
 import IconMap from '@/components/fileExtensionToIconMap';
 import {
   deleteFileAction,
@@ -76,6 +76,22 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
   const fileType = file.type === 'dir' ? 'folder' : 'file';
   const { copy } = useClipboard();
 
+  const copyHandler = (
+    file: DirEntery | FileEntry,
+    { move }: { move: boolean } = { move: false },
+  ) => {
+    copy({
+      path: file.path,
+      name: file.name,
+      mode: 'copy',
+    });
+    addToast({
+      title: move ? 'Cut' : 'Copied',
+      color: 'default',
+      icon: move ? <CutIcon size={24} /> : <CopyIcon size={20} />,
+    });
+  };
+
   return (
     <div className="flex flex-row items-center">
       <div className="flex h-full w-8 items-center justify-center from-content1 to-content2 hover:cursor-pointer hover:bg-gradient-to-r">
@@ -95,7 +111,7 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
                   className="hover:bg-primary-50"
                   // description={`Download ${fileType}`}
                   startContent={<DownloadIcon weight="BoldDuotone" />}
-                  onClick={() => {
+                  onPress={() => {
                     window.location.href = file.path + '?dl=true';
                   }}
                 >
@@ -114,19 +130,7 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
                     <CopyIcon />
                   </div>
                 }
-                onPress={() => {
-                  copy({
-                    path: file.path,
-                    type: file.type === 'dir' ? 'dir' : 'file',
-                    name: file.name,
-                    mode: 'copy',
-                  });
-                  addToast({
-                    title: 'Copied',
-                    color: 'default',
-                    icon: <CopyIcon size={20} />,
-                  });
-                }}
+                onPress={() => copyHandler(file)}
               >
                 Copy
               </DropdownItem>
@@ -140,19 +144,7 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
                     <CutIcon />
                   </div>
                 }
-                onClick={() => {
-                  copy({
-                    path: file.path,
-                    type: file.type === 'dir' ? 'dir' : 'file',
-                    name: file.name,
-                    mode: 'move',
-                  });
-                  addToast({
-                    title: 'Copied',
-                    color: 'default',
-                    icon: <CopyIcon size={20} />,
-                  });
-                }}
+                onPress={() => copyHandler(file, { move: true })}
               >
                 Move
               </DropdownItem>
@@ -166,7 +158,7 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
                     <RenameIcon />
                   </div>
                 }
-                onClick={() => {
+                onPress={() => {
                   // moveFileAction(file.path);
                 }}
               >
@@ -184,7 +176,7 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
                 description={`Permanently delete ${fileType}`}
                 startContent={<DeleteIcon />}
                 variant="solid"
-                onClick={() => {
+                onPress={() => {
                   // TODO: Implement delete logic
                 }}
               >
