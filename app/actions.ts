@@ -1,4 +1,7 @@
 'use server';
-import { copyFile } from '@/lib/io';
 
-export default copyFile;
+import { copyFile, moveFile, deleteFile } from '@/lib/io';
+
+export const copy = copyFile;
+export const move = moveFile;
+export const remove = deleteFile;
