@@ -49,7 +49,10 @@ export type GetDataResult =
   | ({ kind: 'dir' } & DirEntery)
   | ({ kind: 'file' } & FileEntry);
 
-export type FilePermissions = ['read'?, 'write'?, 'execute'?] | 'EACCES';
+export type FilePermissions =
+  | ['read'?, 'write'?, 'execute'?]
+  | 'EACCES'
+  | 'ENOENT';
 
 export type downloadFileSuccess = {
   error: false;
@@ -71,3 +74,13 @@ export type BreadcrumbsItemsProps = {
   path: string;
   type?: 'file' | 'dir';
 }[];
+
+export type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
+
+export type CopyFileError =
+  | 'MISSING_PATH'
+  | 'SOURCE_NOT_FOUND'
+  | 'DEST_DIR_NOT_FOUND'
+  | 'NO_READ_PERMISSION'
+  | 'NO_WRITE_PERMISSION'
+  | 'COPY_FAILED';

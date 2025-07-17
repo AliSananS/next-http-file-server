@@ -1,10 +1,17 @@
 import { existsSync, PathLike } from 'node:fs';
 import * as fs from 'node:fs/promises';
-import * as path from 'path';
+import * as path from 'node:path';
 
 import fileTypeMap from './fileTypeMap';
 
-import { FileEntry, FilePermissions, FileTypes, GetDataResult } from '@/types';
+import {
+  Result,
+  FileEntry,
+  FilePermissions,
+  FileTypes,
+  GetDataResult,
+  CopyFileError,
+} from '@/types';
 import { log } from '@/lib/log';
 
 const baseDir = process.env.BASE_DIR || process.cwd();
@@ -21,7 +28,6 @@ export async function getData(params: string[]): Promise<GetDataResult> {
   const relPath = convertParams(params);
   const filePath = resolveWithBaseDir(relPath);
 
-  log.debug('FILE:', filePath);
   if (!existsSync(filePath)) {
     return {
       kind: 'error',
@@ -52,6 +58,7 @@ export async function getData(params: string[]): Promise<GetDataResult> {
 
       const filePermissions: FilePermissions =
         await checkFilePermissions(childRelPath);
+
       const fileType: FileTypes = await checkFileType(childRelPath);
 
       if (filePermissions === 'EACCES') {
@@ -141,21 +148,29 @@ export async function checkFilePermissions(
   relPath: PathLike,
 ): Promise<FilePermissions> {
   const resolvedPath = resolveWithBaseDir(relPath.toString());
-  const filePermissions: FilePermissions = [];
+
+  if (!existsSync(resolvedPath)) {
+    log.error("checkFilePermissions(): File doesn't exist.", relPath);
+
+    return 'ENOENT';
+  }
+
+  const permissions: FilePermissions = [];
 
   try {
     await fs.access(resolvedPath, fs.constants.R_OK);
-    filePermissions.push('read');
+    permissions[0] = 'read';
   } catch {}
   try {
     await fs.access(resolvedPath, fs.constants.W_OK);
-    filePermissions.push('write');
+    permissions[1] = 'write';
   } catch {}
-  if (filePermissions.length <= 0) {
-    return 'EACCES';
-  }
+  try {
+    await fs.access(resolvedPath, fs.constants.X_OK);
+    permissions[2] = 'execute';
+  } catch {}
 
-  return filePermissions;
+  return permissions.some(Boolean) ? permissions : 'EACCES';
 }
 
 export async function deleteFile(
@@ -185,15 +200,15 @@ export async function moveFile(
   destination: string,
   { force }: { force?: boolean } = { force: false },
 ): Promise<boolean> {
-  const sourcePath = resolveWithBaseDir(source);
-  const destinationPath = resolveWithBaseDir(destination);
+  const srcResolved = resolveWithBaseDir(source);
+  const destResolved = resolveWithBaseDir(destination);
 
-  if (!existsSync(sourcePath)) {
+  if (!existsSync(srcResolved)) {
     return false;
   }
 
   try {
-    await fs.rename(sourcePath, destinationPath);
+    await fs.rename(srcResolved, destResolved);
 
     return true;
   } catch (error) {
@@ -206,49 +221,45 @@ export async function moveFile(
 export async function copyFile(
   source: string,
   destination: string,
-): Promise<boolean> {
-  const sourcePath = resolveWithBaseDir(source);
-  const destinationPath = resolveWithBaseDir(destination);
-  const destinationDir = path.dirname(destinationPath);
-  log.debug("src:", sourcePath, "dest:", destinationPath);
-
-  const sourcePermisions = await checkFilePermissions(sourcePath);
-  const destinationPermisions = await checkFilePermissions(destinationDir);
-  log.debug("destDir:", destinationDir, "destFile:", destinationPath)
-  log.debug("Permisions: src:", sourcePermisions, "dest:", destinationPermisions);
-
-  if (!sourcePath){
-    log.error("copyFile: sourcePath is undefined");
-    return false;
-  }
-  if (!destinationPath){
-    log.error("copyFile: destinationPath is undefined");
-    return false;
+): Promise<Result<string, CopyFileError>> {
+  if (!source || !destination) {
+    return { ok: false, error: 'MISSING_PATH' };
   }
 
-  if (!sourcePermisions.includes("read")){
-    log.info(sourcePath, ":sourcePath No read permision");
+  const normalizedDest = destination.startsWith('/')
+    ? destination.slice(1)
+    : destination;
 
-    return false;
+  const srcResolved = resolveWithBaseDir(source);
+  const destResolved = resolveWithBaseDir(normalizedDest);
+  const destinationDir = path.dirname(destResolved);
+
+  if (!existsSync(srcResolved)) {
+    return { ok: false, error: 'SOURCE_NOT_FOUND' };
   }
-  if (!destinationPermisions.includes("write")){
-    log.info(destinationDir, ": destinationPath No write permision");
 
-    return false;
+  if (!existsSync(destinationDir)) {
+    return { ok: false, error: 'DEST_DIR_NOT_FOUND' };
   }
 
-  if (!existsSync(sourcePath)) {
-    return false;
+  const [srcPerms, destPerms] = await Promise.all([
+    checkFilePermissions(srcResolved),
+    checkFilePermissions(destinationDir),
+  ]);
+
+  if (!srcPerms.includes('read')) {
+    return { ok: false, error: 'NO_READ_PERMISSION' };
+  }
+
+  if (!destPerms.includes('write')) {
+    return { ok: false, error: 'NO_WRITE_PERMISSION' };
   }
 
   try {
-    await fs.cp(sourcePath, destinationPath, { recursive: true });
-    log.debug(`fs.cp: src:${sourcePath} dest:${destinationPath}`);
+    await fs.cp(srcResolved, destResolved, { recursive: true });
 
-    return true;
-  } catch (error) {
-    log.error('Error copying file:', error);
-
-    return false;
+    return { ok: true, value: destResolved };
+  } catch {
+    return { ok: false, error: 'COPY_FAILED' };
   }
 }

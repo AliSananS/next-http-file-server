@@ -5,16 +5,18 @@ import { usePathname } from 'next/navigation';
 
 import { useClipboard } from '@/hooks/ClipboardContext';
 import { PasteIcon, AddFolderIcon, UploadIcon } from '@/components/icons';
-import copyFileAction from '@/app/actions';
-import path from 'path';
+import { copy } from '@/app/actions';
 
 export function ActionButtons() {
   const pathname = usePathname();
+
+  // alert('Pathname:' + pathname);
   const { item } = useClipboard();
   const handlePaste = async () => {
     if (item !== null) {
       const destinationPath = `${pathname}/${item.name}`;
-      await copyFileAction(item.path, destinationPath);
+
+      await copy(item.path, destinationPath);
     }
   };
 
