@@ -35,12 +35,31 @@ export type DirEntery = {
   children: FileEntry[];
 };
 
-export type FileErrorTypes = 'EACCES' | 'ENOENT' | 'UNKNOWN';
+export type FileErrorTypes =
+  | 'EACCES'
+  | 'EPERM'
+  | 'ENOENT'
+  | 'EEXIST'
+  | 'EPATHINJECTION'
+  | 'EIO'
+  | 'EINVAL'
+  | 'EXDEV'
+  | 'ENOTDIR'
+  | 'EISDIR'
+  | 'EBUSY'
+  | 'EFBIG'
+  | 'EUNKNOWN';
+
+export type FileOperationError = {
+  ok: false;
+  code: FileErrorTypes;
+  msg: string;
+};
 
 export type FileEntrySuccess = DirEntery | FileEntry;
 
 export type FileEntryError = {
-  errorCode: FileErrorTypes;
+  code: FileErrorTypes;
   msg?: unknown;
 };
 
@@ -84,3 +103,86 @@ export type CopyFileError =
   | 'NO_READ_PERMISSION'
   | 'NO_WRITE_PERMISSION'
   | 'COPY_FAILED';
+
+type FileErrorEntry = {
+  code: string;
+  message: string;
+};
+
+export const FileErrorMap: Record<string, FileErrorEntry> = {
+  // 🔒 PERMISSIONS
+  EACCES: {
+    code: 'EACCES',
+    message: "Nice try. You don't have permission to touch that file. 👮‍♂️",
+  },
+  EPERM: {
+    code: 'EPERM',
+    message: "Permission denied. You're not that guy, pal. 🛑",
+  },
+
+  // 🚫 FILE/FOLDER NOT FOUND
+  ENOENT: {
+    code: 'ENOENT',
+    message: "It's gone. Like your motivation after 3am. 📂❌",
+  },
+
+  // ❌ FILE EXISTS
+  EEXIST: {
+    code: 'EEXIST',
+    message: 'Already exists. Stop trying to clone stuff like an intern. 🧬',
+  },
+
+  // 🚫 INVALID PATH / BACKDIR
+  EPATHINJECTION: {
+    code: 'EPATHINJECTION',
+    message: 'Trying to sneak into root? Not on my watch, Hackerman. 🕶️',
+  },
+
+  // 💽 IO ERRORS
+  EIO: {
+    code: 'EIO',
+    message: "Disk said no. Maybe it's tired too. 💿💤",
+  },
+
+  // 📛 INVALID ARGUMENT
+  EINVAL: {
+    code: 'EINVAL',
+    message: "That path is so wrong even a GPS can't help. 🗺️",
+  },
+
+  // 🔄 CROSS DEVICE
+  EXDEV: {
+    code: 'EXDEV',
+    message: "Can't move across devices. We don’t teleport files yet. ✨",
+  },
+
+  // 💾 NOT A DIRECTORY
+  ENOTDIR: {
+    code: 'ENOTDIR',
+    message: "You thought that was a folder? It ain't. 🧱",
+  },
+
+  // 📁 IS A DIRECTORY
+  EISDIR: {
+    code: 'EISDIR',
+    message: 'You tried to handle a folder like a file. Bad touch. 🧼',
+  },
+
+  // ❌ FILE IS BUSY
+  EBUSY: {
+    code: 'EBUSY',
+    message: 'Chill, that file is busy doing file things. ☕',
+  },
+
+  // 🚫 FILE TOO LARGE
+  EFBIG: {
+    code: 'EFBIG',
+    message: "File too thicc. Can't handle all that data. 🍑💾",
+  },
+
+  // ❓UNKNOWN
+  EUNKNOWN: {
+    code: 'EUNKNOWN',
+    message: 'Something went wrong but we’re too lazy to tell you what. 🫠',
+  },
+};

@@ -14,10 +14,10 @@ export async function GET(
   const data = await getData(file);
 
   if (data.kind === 'error') {
-    if (data.errorCode === 'ENOENT') {
+    if (data.code === 'ENOENT') {
       return new Response('Not Found', { status: 404 });
     }
-    if (data.errorCode === 'EACCES') {
+    if (data.code === 'EACCES') {
       return new Response('Forbidden', { status: 403 });
     }
 
