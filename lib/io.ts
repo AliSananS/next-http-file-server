@@ -11,27 +11,56 @@ import {
   FileTypes,
   GetDataResult,
   CopyFileError,
+  FileErrorTypes,
+  FileEntryError,
+  FileOperationError,
+  FileErrorMap,
 } from '@/types';
 import { log } from '@/lib/log';
+import { sanitizeUrlPath } from '@/lib/helpers';
 
 const baseDir = process.env.BASE_DIR || process.cwd();
 
-function resolveWithBaseDir(filePath: string) {
-  return path.resolve(baseDir, filePath);
+export function getErrorMsg(code: FileErrorTypes) {
+  return FileErrorMap[code]?.message || FileErrorMap.EUNKNOWN.message;
+}
+
+function resolveWithBaseDir(
+  filePath: string,
+): { ok: true; path: string } | FileOperationError {
+  if (/(\.\.(\/|\\))+/g.test(filePath)) {
+    return {
+      ok: false,
+      code: 'EPATHINJECTION',
+      msg: '',
+    };
+  }
+
+  return { ok: true, path: path.resolve(baseDir, filePath) };
 }
 
 export function convertParams(params: string[]): string {
-  return params.join('/');
+  const path = params.join('/');
+
+  return sanitizeUrlPath(path);
 }
 
 export async function getData(params: string[]): Promise<GetDataResult> {
   const relPath = convertParams(params);
-  const filePath = resolveWithBaseDir(relPath);
+  const resolvedPath = resolveWithBaseDir(relPath);
 
-  if (!existsSync(filePath)) {
+  if (!resolvedPath.ok) {
     return {
       kind: 'error',
-      errorCode: 'ENOENT',
+      code: resolvedPath.code,
+      msg: resolvedPath.msg || getErrorMsg(resolvedPath.code),
+    };
+  }
+
+  if (!existsSync(resolvedPath.path)) {
+    return {
+      kind: 'error',
+      code: 'ENOENT',
       msg: 'No such file or directory',
     };
   }
@@ -41,16 +70,16 @@ export async function getData(params: string[]): Promise<GetDataResult> {
   if (permissions === 'EACCES') {
     return {
       kind: 'error',
-      errorCode: 'EACCES',
+      code: 'EACCES',
       msg: 'Permission denied',
     };
   }
 
-  const fileStat = await fs.stat(filePath);
+  const fileStat = await fs.stat(resolvedPath.path);
 
   if (fileStat.isDirectory()) {
     let filesInDirectory: FileEntry[] = [];
-    const data = await fs.readdir(filePath, { withFileTypes: true });
+    const data = await fs.readdir(resolvedPath.path, { withFileTypes: true });
 
     for (const file of data) {
       const childRelPath = path.join(relPath, file.name);
@@ -61,7 +90,7 @@ export async function getData(params: string[]): Promise<GetDataResult> {
 
       const fileType: FileTypes = await checkFileType(childRelPath);
 
-      if (filePermissions === 'EACCES') {
+      if (filePermissions === 'EACCES' || !fullPath.ok) {
         filesInDirectory.push({
           name: file.name,
           path: childRelPath,
@@ -71,7 +100,7 @@ export async function getData(params: string[]): Promise<GetDataResult> {
         continue;
       }
 
-      const fileDetails = await fs.stat(fullPath);
+      const fileDetails = await fs.stat(fullPath.path);
 
       filesInDirectory.push({
         name: file.name,
@@ -114,14 +143,19 @@ export async function getData(params: string[]): Promise<GetDataResult> {
 
   return {
     kind: 'error',
-    errorCode: 'UNKNOWN',
+    code: 'EUNKNOWN',
     msg: 'Could not getData because of an unknown error',
   };
 }
 
 export async function checkFileType(relPath: string): Promise<FileTypes> {
   const resolvedPath = resolveWithBaseDir(relPath);
-  const fileStat = await fs.stat(resolvedPath);
+
+  if (!resolvedPath.ok) {
+    return 'other';
+  }
+
+  const fileStat = await fs.stat(resolvedPath.path);
 
   if (fileStat.isDirectory()) {
     return 'dir';
@@ -130,7 +164,7 @@ export async function checkFileType(relPath: string): Promise<FileTypes> {
     return 'symlink';
   }
   if (fileStat.isFile()) {
-    const fileExtension = path.extname(resolvedPath);
+    const fileExtension = path.extname(resolvedPath.path);
 
     for (const [type, extensions] of Object.entries(fileTypeMap)) {
       if (
@@ -149,7 +183,13 @@ export async function checkFilePermissions(
 ): Promise<FilePermissions> {
   const resolvedPath = resolveWithBaseDir(relPath.toString());
 
-  if (!existsSync(resolvedPath)) {
+  if (!resolvedPath.ok) {
+    log.error('checkFilePermissions(): Invalid path.', relPath);
+
+    return 'EACCES';
+  }
+
+  if (!existsSync(resolvedPath.path)) {
     log.error("checkFilePermissions(): File doesn't exist.", relPath);
 
     return 'ENOENT';
@@ -158,15 +198,15 @@ export async function checkFilePermissions(
   const permissions: FilePermissions = [];
 
   try {
-    await fs.access(resolvedPath, fs.constants.R_OK);
+    await fs.access(resolvedPath.path, fs.constants.R_OK);
     permissions[0] = 'read';
   } catch {}
   try {
-    await fs.access(resolvedPath, fs.constants.W_OK);
+    await fs.access(resolvedPath.path, fs.constants.W_OK);
     permissions[1] = 'write';
   } catch {}
   try {
-    await fs.access(resolvedPath, fs.constants.X_OK);
+    await fs.access(resolvedPath.path, fs.constants.X_OK);
     permissions[2] = 'execute';
   } catch {}
 
@@ -182,12 +222,16 @@ export async function deleteFile(
 ): Promise<boolean> {
   const resolvedPath = resolveWithBaseDir(relPath);
 
-  if (!existsSync(resolvedPath)) {
+  if (!resolvedPath.ok) {
+    return false;
+  }
+
+  if (!existsSync(resolvedPath.path)) {
     return false;
   }
 
   try {
-    await fs.rm(resolvedPath, { force, recursive });
+    await fs.rm(resolvedPath.path, { force, recursive });
 
     return true;
   } catch {
@@ -203,12 +247,16 @@ export async function moveFile(
   const srcResolved = resolveWithBaseDir(source);
   const destResolved = resolveWithBaseDir(destination);
 
-  if (!existsSync(srcResolved)) {
+  if (!srcResolved.ok || !destResolved.ok) {
+    return false;
+  }
+
+  if (!existsSync(srcResolved.path)) {
     return false;
   }
 
   try {
-    await fs.rename(srcResolved, destResolved);
+    await fs.rename(srcResolved.path, destResolved.path);
 
     return true;
   } catch (error) {
@@ -232,9 +280,14 @@ export async function copyFile(
 
   const srcResolved = resolveWithBaseDir(source);
   const destResolved = resolveWithBaseDir(normalizedDest);
-  const destinationDir = path.dirname(destResolved);
 
-  if (!existsSync(srcResolved)) {
+  if (!srcResolved.ok || !destResolved.ok) {
+    return { ok: false, error: 'SOURCE_NOT_FOUND' };
+  }
+
+  const destinationDir = path.dirname(destResolved.path);
+
+  if (!existsSync(srcResolved.path)) {
     return { ok: false, error: 'SOURCE_NOT_FOUND' };
   }
 
@@ -243,7 +296,7 @@ export async function copyFile(
   }
 
   const [srcPerms, destPerms] = await Promise.all([
-    checkFilePermissions(srcResolved),
+    checkFilePermissions(srcResolved.path),
     checkFilePermissions(destinationDir),
   ]);
 
@@ -256,9 +309,9 @@ export async function copyFile(
   }
 
   try {
-    await fs.cp(srcResolved, destResolved, { recursive: true });
+    await fs.cp(srcResolved.path, destResolved.path, { recursive: true });
 
-    return { ok: true, value: destResolved };
+    return { ok: true, value: destResolved.path };
   } catch {
     return { ok: false, error: 'COPY_FAILED' };
   }

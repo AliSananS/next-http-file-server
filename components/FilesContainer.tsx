@@ -84,7 +84,7 @@ function FileViewer({ file }: { file: FileEntry }) {
 }
 
 function ErrorHandler({ error }: { error: FileEntryError }) {
-  const { message, icon } = FileErrorMap[error.errorCode] || {
+  const { message, icon } = FileErrorMap[error.code] || {
     message: 'Unknown error occurred',
     icon: <ErrorIcon />,
   };
