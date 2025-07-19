@@ -1,5 +1,6 @@
 import { ReactNode } from 'react';
 
+import { FileErrorMap as ErrorMsgMapType } from '@/types/fileErrors';
 import { ErrorIcon, FolderErrorIcon } from '@/components/icons';
 
 export const FileErrorMap: Record<
@@ -7,15 +8,15 @@ export const FileErrorMap: Record<
   { message: string; icon: ReactNode }
 > = {
   ENOENT: {
-    message: 'No such a file or directory',
+    message: ErrorMsgMapType.ENOENT.message,
     icon: <FolderErrorIcon />,
   },
   EACCES: {
-    message: 'Permission denied',
+    message: ErrorMsgMapType.EACCES.message,
     icon: <ErrorIcon />,
   },
   UNKNOWN: {
-    message: "An Error we don't know",
+    message: ErrorMsgMapType.UNKNOWN.message,
     icon: <ErrorIcon />,
   },
 };

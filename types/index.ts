@@ -1,5 +1,11 @@
-import { PathLike } from 'fs';
+export type RenameFileErrorTypes =
+  | 'MISSING_PATH'
+  | 'SOURCE_NOT_FOUND'
+  | 'DEST_ALREADY_EXISTS'
+  | 'NO_WRITE_PERMISSION'
+  | 'UNKNOWN';
 
+export type RenameFileResult = FileOperationsType<string, RenameFileErrorTypes>;
 import { SVGProps } from 'react';
 
 export type IconSvgProps = SVGProps<SVGSVGElement> & {
@@ -34,21 +40,6 @@ export type DirEntery = {
   path: string;
   children: FileEntry[];
 };
-
-export type FileErrorTypes =
-  | 'EACCES'
-  | 'EPERM'
-  | 'ENOENT'
-  | 'EEXIST'
-  | 'EPATHINJECTION'
-  | 'EIO'
-  | 'EINVAL'
-  | 'EXDEV'
-  | 'ENOTDIR'
-  | 'EISDIR'
-  | 'EBUSY'
-  | 'EFBIG'
-  | 'EUNKNOWN';
 
 export type FileOperationError = {
   ok: false;
@@ -94,95 +85,34 @@ export type BreadcrumbsItemsProps = {
   type?: 'file' | 'dir';
 }[];
 
-export type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
+export type FileErrorTypes =
+  | 'EACCES'
+  | 'EPERM'
+  | 'ENOENT'
+  | 'EEXIST'
+  | 'EPATHINJECTION'
+  | 'EIO'
+  | 'EINVAL'
+  | 'EXDEV'
+  | 'ENOTDIR'
+  | 'EISDIR'
+  | 'EBUSY'
+  | 'EFBIG'
+  | 'UNKNOWN';
 
-export type CopyFileError =
+export type CopyFileErrorTypes =
   | 'MISSING_PATH'
   | 'SOURCE_NOT_FOUND'
   | 'DEST_DIR_NOT_FOUND'
   | 'NO_READ_PERMISSION'
   | 'NO_WRITE_PERMISSION'
-  | 'COPY_FAILED';
+  | 'COPY_FAILED'
+  | 'DEST_ALREADY_EXISTS'
+  | 'UNKNOWN';
 
-type FileErrorEntry = {
-  code: string;
-  message: string;
-};
+export type FileOperationsType<T, E> = Result<T, E>;
 
-export const FileErrorMap: Record<string, FileErrorEntry> = {
-  // 🔒 PERMISSIONS
-  EACCES: {
-    code: 'EACCES',
-    message: "Nice try. You don't have permission to touch that file. 👮‍♂️",
-  },
-  EPERM: {
-    code: 'EPERM',
-    message: "Permission denied. You're not that guy, pal. 🛑",
-  },
+export type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
 
-  // 🚫 FILE/FOLDER NOT FOUND
-  ENOENT: {
-    code: 'ENOENT',
-    message: "It's gone. Like your motivation after 3am. 📂❌",
-  },
-
-  // ❌ FILE EXISTS
-  EEXIST: {
-    code: 'EEXIST',
-    message: 'Already exists. Stop trying to clone stuff like an intern. 🧬',
-  },
-
-  // 🚫 INVALID PATH / BACKDIR
-  EPATHINJECTION: {
-    code: 'EPATHINJECTION',
-    message: 'Trying to sneak into root? Not on my watch, Hackerman. 🕶️',
-  },
-
-  // 💽 IO ERRORS
-  EIO: {
-    code: 'EIO',
-    message: "Disk said no. Maybe it's tired too. 💿💤",
-  },
-
-  // 📛 INVALID ARGUMENT
-  EINVAL: {
-    code: 'EINVAL',
-    message: "That path is so wrong even a GPS can't help. 🗺️",
-  },
-
-  // 🔄 CROSS DEVICE
-  EXDEV: {
-    code: 'EXDEV',
-    message: "Can't move across devices. We don’t teleport files yet. ✨",
-  },
-
-  // 💾 NOT A DIRECTORY
-  ENOTDIR: {
-    code: 'ENOTDIR',
-    message: "You thought that was a folder? It ain't. 🧱",
-  },
-
-  // 📁 IS A DIRECTORY
-  EISDIR: {
-    code: 'EISDIR',
-    message: 'You tried to handle a folder like a file. Bad touch. 🧼',
-  },
-
-  // ❌ FILE IS BUSY
-  EBUSY: {
-    code: 'EBUSY',
-    message: 'Chill, that file is busy doing file things. ☕',
-  },
-
-  // 🚫 FILE TOO LARGE
-  EFBIG: {
-    code: 'EFBIG',
-    message: "File too thicc. Can't handle all that data. 🍑💾",
-  },
-
-  // ❓UNKNOWN
-  EUNKNOWN: {
-    code: 'EUNKNOWN',
-    message: 'Something went wrong but we’re too lazy to tell you what. 🫠',
-  },
-};
+export type CopyFileResult = FileOperationsType<string, CopyFileErrorTypes>;
+export type DeleteFileResult = FileOperationsType<string, FileErrorTypes>;

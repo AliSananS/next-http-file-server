@@ -16,6 +16,7 @@ const {
   DownloadMinimalistic,
   TrashBinTrash,
   InfoCircle,
+  Restart,
 } = SIcons;
 
 import { IconSvgProps } from '@/types';
@@ -44,7 +45,7 @@ export const AddFolderIcon = (props: IconProps) => {
 };
 
 export const FolderIcon = (props: IconProps) => {
-  return <Folder {...props} weight="Outline" />;
+  return <Folder {...props} weight="BoldDuotone" />;
 };
 
 export const MenuDotsIcon = (props: IconProps) => {
@@ -81,6 +82,10 @@ export const DeleteIcon = (props: IconProps) => {
 
 export const InfoIcon = (props: IconProps) => {
   return <InfoCircle {...props} weight="Outline" />;
+};
+
+export const RestartIcon = (props: IconProps) => {
+  return <Restart {...props} weight="Outline" />;
 };
 
 export function RenameIcon({ size, color }: { size?: number; color?: string }) {

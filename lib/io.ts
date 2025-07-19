@@ -10,19 +10,20 @@ import {
   FilePermissions,
   FileTypes,
   GetDataResult,
-  CopyFileError,
+  CopyFileErrorTypes,
   FileErrorTypes,
-  FileEntryError,
+  DeleteFileResult,
   FileOperationError,
-  FileErrorMap,
+  CopyFileResult,
 } from '@/types';
+import { FileErrorMap } from '@/types/fileErrors';
 import { log } from '@/lib/log';
 import { sanitizeUrlPath } from '@/lib/helpers';
 
 const baseDir = process.env.BASE_DIR || process.cwd();
 
 export function getErrorMsg(code: FileErrorTypes) {
-  return FileErrorMap[code]?.message || FileErrorMap.EUNKNOWN.message;
+  return FileErrorMap[code]?.message || FileErrorMap.UNKNOWN.message;
 }
 
 function resolveWithBaseDir(
@@ -143,7 +144,7 @@ export async function getData(params: string[]): Promise<GetDataResult> {
 
   return {
     kind: 'error',
-    code: 'EUNKNOWN',
+    code: 'UNKNOWN',
     msg: 'Could not getData because of an unknown error',
   };
 }
@@ -213,63 +214,38 @@ export async function checkFilePermissions(
   return permissions.some(Boolean) ? permissions : 'EACCES';
 }
 
-export async function deleteFile(
-  relPath: string,
-  { force, recursive }: { force?: boolean; recursive: boolean } = {
-    force: false,
-    recursive: true,
-  },
-): Promise<boolean> {
+export async function deleteFile(relPath: string): Promise<DeleteFileResult> {
   const resolvedPath = resolveWithBaseDir(relPath);
 
   if (!resolvedPath.ok) {
-    return false;
+    return { ok: false, error: resolvedPath.code };
   }
 
-  if (!existsSync(resolvedPath.path)) {
-    return false;
-  }
+  const fullPath = resolvedPath.path;
 
-  try {
-    await fs.rm(resolvedPath.path, { force, recursive });
-
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-export async function moveFile(
-  source: string,
-  destination: string,
-  { force }: { force?: boolean } = { force: false },
-): Promise<boolean> {
-  const srcResolved = resolveWithBaseDir(source);
-  const destResolved = resolveWithBaseDir(destination);
-
-  if (!srcResolved.ok || !destResolved.ok) {
-    return false;
-  }
-
-  if (!existsSync(srcResolved.path)) {
-    return false;
+  if (!existsSync(fullPath)) {
+    return { ok: false, error: 'ENOENT' };
   }
 
   try {
-    await fs.rename(srcResolved.path, destResolved.path);
+    await fs.rm(fullPath, {
+      force: true,
+      recursive: true,
+    });
 
-    return true;
-  } catch (error) {
-    log.error('Error moving file:', error);
+    return { ok: true, value: relPath };
+  } catch (error: any) {
+    const code = (error.code as FileErrorTypes) || 'UNKNOWN';
 
-    return false;
+    return { ok: false, error: code };
   }
 }
 
 export async function copyFile(
   source: string,
   destination: string,
-): Promise<Result<string, CopyFileError>> {
+  { move }: { move?: boolean } = { move: false },
+): Promise<Result<string, CopyFileErrorTypes>> {
   if (!source || !destination) {
     return { ok: false, error: 'MISSING_PATH' };
   }
@@ -295,24 +271,79 @@ export async function copyFile(
     return { ok: false, error: 'DEST_DIR_NOT_FOUND' };
   }
 
+  if (existsSync(destResolved.path)) {
+    return { ok: false, error: 'DEST_ALREADY_EXISTS' };
+  }
+
   const [srcPerms, destPerms] = await Promise.all([
     checkFilePermissions(srcResolved.path),
     checkFilePermissions(destinationDir),
   ]);
 
-  if (!srcPerms.includes('read')) {
+  if (!Array.isArray(srcPerms) || !srcPerms.includes('read')) {
     return { ok: false, error: 'NO_READ_PERMISSION' };
   }
 
-  if (!destPerms.includes('write')) {
+  if (!Array.isArray(destPerms) || !destPerms.includes('write')) {
     return { ok: false, error: 'NO_WRITE_PERMISSION' };
   }
 
   try {
+    if (move) {
+      await fs.rename(srcResolved.path, destResolved.path);
+
+      return {
+        ok: true,
+        value: destResolved.path,
+      };
+    }
     await fs.cp(srcResolved.path, destResolved.path, { recursive: true });
 
-    return { ok: true, value: destResolved.path };
+    return {
+      ok: true,
+      value: destResolved.path,
+    };
   } catch {
     return { ok: false, error: 'COPY_FAILED' };
+  }
+}
+
+export async function renameFile(
+  oldRelPath: string,
+  newRelPath: string,
+): Promise<CopyFileResult> {
+  const oldResolved = resolveWithBaseDir(oldRelPath);
+  const newResolved = resolveWithBaseDir(newRelPath);
+
+  if (!oldResolved.ok || !newResolved.ok) {
+    return { ok: false, error: 'MISSING_PATH' };
+  }
+
+  if (!existsSync(oldResolved.path)) {
+    return { ok: false, error: 'SOURCE_NOT_FOUND' };
+  }
+
+  if (existsSync(newResolved.path)) {
+    return { ok: false, error: 'DEST_ALREADY_EXISTS' };
+  }
+
+  const oldPerms = await checkFilePermissions(oldResolved.path);
+  const newDir = path.dirname(newResolved.path);
+  const newDirPerms = await checkFilePermissions(newDir);
+
+  if (!Array.isArray(oldPerms) || !oldPerms.includes('write')) {
+    return { ok: false, error: 'NO_WRITE_PERMISSION' };
+  }
+
+  if (!Array.isArray(newDirPerms) || !newDirPerms.includes('write')) {
+    return { ok: false, error: 'NO_WRITE_PERMISSION' };
+  }
+
+  try {
+    await fs.rename(oldResolved.path, newResolved.path);
+
+    return { ok: true, value: newResolved.path };
+  } catch {
+    return { ok: false, error: 'UNKNOWN' };
   }
 }

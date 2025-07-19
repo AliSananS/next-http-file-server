@@ -22,11 +22,6 @@ import {
 } from '@/components/icons';
 import { DirEntery, FileEntry } from '@/types';
 import IconMap from '@/components/fileExtensionToIconMap';
-import {
-  deleteFileAction,
-  copyFileAction,
-  moveFileAction,
-} from '@/app/nhfs_actions/route';
 import { useClipboard } from '@/hooks/ClipboardContext';
 
 export default function FilesList({ files }: { files: DirEntery }) {
@@ -161,7 +156,7 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
                   // moveFileAction(file.path);
                 }}
               >
-                Rename
+                Rename :TODO
               </DropdownItem>
             </DropdownSection>
             <DropdownSection showDivider title="Danger Zone">
@@ -175,9 +170,7 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
                 description={`Permanently delete ${fileType}`}
                 startContent={<DeleteIcon />}
                 variant="solid"
-                onPress={() => {
-                  // TODO: Implement delete logic
-                }}
+                onPress={() => {}}
               >
                 Delete
               </DropdownItem>
