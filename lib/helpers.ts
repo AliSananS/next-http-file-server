@@ -22,9 +22,11 @@ export function shrtn(name: string, maxLength = 24): string {
 }
 
 export function sanitizeUrlPath(urlPath: string) {
-  return decodeURIComponent(urlPath)
-    .replace(/\+/g, ' ') // Replace + with space
-    .replace(/[^a-zA-Z0-9 _.-]/g, '') // Strip anything not alphanum, space, underscore, hyphen, dot
-    .replace(/\s+/g, ' ') // Collapse multiple spaces
-    .trim(); // Remove leading/trailing whitespace
+  return (
+    decodeURIComponent(urlPath)
+      // .replace(/\+/g, ' ') // Replace + with space
+      // .replace(/[^a-zA-Z0-9 _\-]/g, '') // Strip anything not alphanum, space, underscore, hyphen, dot
+      // .replace(/\s+/g, ' ') // Collapse multiple spaces
+      .trim()
+  ); // Remove leading/trailing whitespace
 }

@@ -1,16 +1,9 @@
 import path from 'node:path';
 
-import React from 'react';
 import { Divider } from '@heroui/divider';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 
-import {
-  AddFolderIcon,
-  ErrorIcon,
-  PasteIcon,
-  UploadIcon,
-} from '@/components/icons';
+import { ErrorIcon } from '@/components/icons';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import { FileEntry, FileEntryError, GetDataResult } from '@/types';
 import FilesList from '@/components/FilesList';
@@ -19,7 +12,6 @@ import createBreadcrumbsData from '@/lib/createBreadcrumbsData';
 import fileTypeMap from '@/lib/fileTypeMap';
 import ImageView from '@/components/ImageView';
 import VideoPlayer from '@/components/VideoPlayer';
-import { useClipboard } from '@/hooks/ClipboardContext';
 import { ActionButtons } from '@/components/ClientComponents';
 
 export default async function FilesContainer({
