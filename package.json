@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "debug": "NODE_OPTIONS='--inspect' next dev --turbopack",
-    "build": "next build",
+    "build": "next build --turbo",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
