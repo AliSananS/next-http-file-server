@@ -47,7 +47,6 @@ export async function GET(
       const stat = statSync(filePath);
       const mimeType = mime.lookup(filePath) || 'application/octet-stream';
 
-      log.debug('Mine type for file:', mimeType);
       const headers = new Headers({
         'Content-Type': mimeType,
         'Content-Length': stat.size.toString(),

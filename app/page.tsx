@@ -1,15 +1,15 @@
 'use server';
 
-import path from 'path';
-
 import ShowFiles from '@/components/ShowFiles';
 
 export default async function Home() {
-  const baseDirectoryPath = process.env.BASE_DIR;
+  const filePath = './'.toString().trim();
 
-  return (
-    <section>
-      <ShowFiles params={['./']} />
-    </section>
-  );
+  if (1 + 1) {
+    return (
+      <section>
+        <ShowFiles params={[filePath]} />
+      </section>
+    );
+  }
 }
