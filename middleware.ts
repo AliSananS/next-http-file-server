@@ -6,7 +6,6 @@ export function middleware(req: NextRequest) {
   const isDownload = url.searchParams.get('dl') === 'true';
 
   if (isDownload) {
-    
     url.pathname = `nhfs_dl${url.pathname}`;
 
     return NextResponse.rewrite(url);
