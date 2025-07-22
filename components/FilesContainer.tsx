@@ -40,16 +40,17 @@ function HeaderSection({ breadCrumbsData }: { breadCrumbsData: any }) {
 }
 
 async function MainContent({ filesData }: { filesData: GetDataResult }) {
-  if (filesData.kind === 'error') {
-    return <ErrorHandler error={filesData} />;
+  if (!filesData.ok) {
+    return <ErrorHandler error={filesData.error} />;
   }
-  if (filesData.kind === 'dir') {
-    return <FilesList files={filesData} />;
+  // filesData.value is DirEntry or FileEntry
+  if ('children' in filesData.value) {
+    return <FilesList files={filesData.value} />;
   }
-  if (filesData.kind === 'file' && fileTypeMap.hasOwnProperty(filesData.type)) {
+  if (fileTypeMap.hasOwnProperty(filesData.value.type)) {
     return (
       <div className="flex h-full w-full items-center justify-center">
-        <FileViewer file={filesData} />
+        <FileViewer file={filesData.value} />
       </div>
     );
   }
@@ -57,7 +58,7 @@ async function MainContent({ filesData }: { filesData: GetDataResult }) {
   return (
     <p>
       Unsupported file.{' '}
-      <Link className="text-blue-500" href={`/${filesData.path}?dl=true`}>
+      <Link className="text-blue-500" href={`/${filesData.value.path}?dl=true`}>
         Download
       </Link>
     </p>

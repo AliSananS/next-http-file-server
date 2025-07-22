@@ -52,17 +52,21 @@ export async function getData(params: string[]): Promise<GetDataResult> {
 
   if (!resolvedPath.ok) {
     return {
-      kind: 'error',
-      code: resolvedPath.code,
-      msg: resolvedPath.msg || getErrorMsg(resolvedPath.code),
+      ok: false,
+      error: {
+        code: resolvedPath.code,
+        msg: resolvedPath.msg || getErrorMsg(resolvedPath.code),
+      },
     };
   }
 
   if (!existsSync(resolvedPath.path)) {
     return {
-      kind: 'error',
-      code: 'ENOENT',
-      msg: 'No such file or directory',
+      ok: false,
+      error: {
+        code: 'ENOENT',
+        msg: 'No such file or directory',
+      },
     };
   }
 
@@ -70,9 +74,11 @@ export async function getData(params: string[]): Promise<GetDataResult> {
 
   if (permissions === 'EACCES') {
     return {
-      kind: 'error',
-      code: 'EACCES',
-      msg: 'Permission denied',
+      ok: false,
+      error: {
+        code: 'EACCES',
+        msg: 'Permission denied',
+      },
     };
   }
 
@@ -121,10 +127,12 @@ export async function getData(params: string[]): Promise<GetDataResult> {
     });
 
     return {
-      kind: 'dir',
-      name: params[params.length - 1],
-      path: relPath,
-      children: sortedFiles,
+      ok: true,
+      value: {
+        name: params[params.length - 1],
+        path: relPath,
+        children: sortedFiles,
+      },
     };
   }
 
@@ -132,20 +140,24 @@ export async function getData(params: string[]): Promise<GetDataResult> {
     const fileType = await checkFileType(relPath);
 
     return {
-      kind: 'file',
-      name: params[params.length - 1],
-      path: relPath,
-      type: fileType,
-      permissions: permissions,
-      size: fileStat.size,
-      time: fileStat.ctime,
+      ok: true,
+      value: {
+        name: params[params.length - 1],
+        path: relPath,
+        type: fileType,
+        permissions: permissions,
+        size: fileStat.size,
+        time: fileStat.ctime,
+      },
     };
   }
 
   return {
-    kind: 'error',
-    code: 'UNKNOWN',
-    msg: 'Could not getData because of an unknown error',
+    ok: false,
+    error: {
+      code: 'UNKNOWN',
+      msg: 'Could not getData because of an unknown error',
+    },
   };
 }
 

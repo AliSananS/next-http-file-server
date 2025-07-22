@@ -54,10 +54,7 @@ export type FileEntryError = {
   msg?: unknown;
 };
 
-export type GetDataResult =
-  | ({ kind: 'error' } & FileEntryError)
-  | ({ kind: 'dir' } & DirEntery)
-  | ({ kind: 'file' } & FileEntry);
+export type GetDataResult = Result<DirEntery | FileEntry, FileEntryError>;
 
 export type FilePermissions =
   | ['read'?, 'write'?, 'execute'?]
