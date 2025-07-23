@@ -1,4 +1,5 @@
 import path from 'node:path';
+import url from 'node:url';
 
 import { Divider } from '@heroui/divider';
 import Link from 'next/link';
@@ -13,6 +14,7 @@ import fileTypeMap from '@/lib/fileTypeMap';
 import ImageView from '@/components/ImageView';
 import VideoPlayer from '@/components/VideoPlayer';
 import { ActionButtons } from '@/components/ClientComponents';
+import { log } from '@/lib/log';
 
 export default async function FilesContainer({
   filesData,
@@ -66,7 +68,7 @@ async function MainContent({ filesData }: { filesData: GetDataResult }) {
 }
 
 function FileViewer({ file }: { file: FileEntry }) {
-  const fileUrl = path.join('/nhfs_dl', file.path);
+  const fileUrl = file.path + '?dl=true';
 
   if (file.type === 'image') {
     return <ImageView src={fileUrl} />;

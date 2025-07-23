@@ -1,11 +1,9 @@
 'use client';
 
-import path from 'path';
-
 import React from 'react';
 import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Spinner } from '@heroui/spinner';
-import Image from 'next/image';
+import { Image } from '@heroui/image';
 
 type ImageViewProps = {
   src: string;
@@ -37,23 +35,10 @@ export default function ImageView({
       <CardBody className="flex flex-col items-center justify-center p-0">
         <div className="relative flex min-h-64 w-full items-center justify-center overflow-auto">
           <div className="flex h-full max-h-full w-full max-w-full items-center justify-center overflow-hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              // unoptimized
+            <Image
               alt={alt || fileName || 'Image'}
-              // className={`shadow ${loading ? 'invisible' : 'visible'}`}
-              draggable={false}
-              // height={0}
-              // sizes="100vw"
+              className={`shadow ${loading ? 'invisible' : 'visible'}`}
               src={src}
-              // style={{
-              // 	maxWidth: '100%',
-              // 	maxHeight: '100%',
-              // 	height: 'auto',
-              // 	width: 'auto',
-              // 	display: loading ? 'none' : 'block',
-              // }}
-              // width={0}
               onError={() => {
                 setLoading(false);
                 setError(true);

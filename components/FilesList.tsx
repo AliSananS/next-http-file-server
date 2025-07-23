@@ -10,6 +10,7 @@ import {
   DropdownTrigger,
 } from '@heroui/dropdown';
 import { addToast } from '@heroui/toast';
+import { useRouter } from 'next/navigation';
 
 import {
   CopyIcon,
@@ -23,6 +24,8 @@ import {
 import { DirEntery, FileEntry } from '@/types';
 import IconMap from '@/components/fileExtensionToIconMap';
 import { useClipboard } from '@/hooks/ClipboardContext';
+import { deleteFileAction } from '@/app/actions';
+import { FileErrorMap } from '@/types/fileErrors';
 
 export default function FilesList({ files }: { files: DirEntery }) {
   return (
@@ -69,6 +72,7 @@ const LeftWrapper = ({
 const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
   const fileType = file.type === 'dir' ? 'folder' : 'file';
   const { copy } = useClipboard();
+  const router = useRouter();
 
   const copyHandler = (
     file: DirEntery | FileEntry,
@@ -84,6 +88,27 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
       color: 'default',
       icon: move ? <CutIcon size={24} /> : <CopyIcon size={20} />,
     });
+  };
+
+  const deleteHandler = async (file: DirEntery | FileEntry) => {
+    const res = await deleteFileAction(file.path);
+
+    if (res.ok) {
+      addToast({
+        title: 'Deleted',
+        color: 'default',
+        icon: <DeleteIcon size={20} />,
+      });
+      router.refresh();
+    } else {
+      addToast({
+        title: 'Error deleting file',
+        color: 'danger',
+        description:
+          FileErrorMap[res.error]?.message || FileErrorMap.UNKNOWN.message,
+        icon: <DeleteIcon size={20} />,
+      });
+    }
   };
 
   return (
@@ -170,7 +195,7 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
                 description={`Permanently delete ${fileType}`}
                 startContent={<DeleteIcon />}
                 variant="solid"
-                onPress={() => {}}
+                onPress={() => deleteHandler(file)}
               >
                 Delete
               </DropdownItem>
