@@ -46,7 +46,9 @@ export function convertParams(params: string[]): string {
   return sanitizeUrlPath(path);
 }
 
-export async function getData(params: string[]): Promise<GetDataResult> {
+export async function getData(
+  params: string[] = ['./'],
+): Promise<GetDataResult> {
   const relPath = convertParams(params);
   const resolvedPath = resolveWithBaseDir(relPath);
 
