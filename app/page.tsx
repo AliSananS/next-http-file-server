@@ -1,5 +1,5 @@
 'use server';
-
+export const dynamic = 'force-dynamic';
 import path from 'path';
 
 import ShowFiles from '@/components/ShowFiles';
