@@ -1,3 +1,5 @@
+import { resolve as resolveURL } from 'node:url';
+
 import { NextRequest, NextResponse } from 'next/server';
 
 export function middleware(req: NextRequest) {
