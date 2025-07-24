@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardBody, CardHeader } from '@heroui/card';
 import { Spinner } from '@heroui/spinner';
 import { Image } from '@heroui/image';
@@ -18,37 +18,22 @@ export default function ImageView({
   fileName,
   className,
 }: ImageViewProps) {
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(false);
+
+  const [error, setError] = useState(false)
+  const [loading, setLoading] = useState(true);
 
   return (
-    <Card
-      className={`min-h-full w-full min-w-full max-w-full rounded-xl border-1 border-solid border-divider bg-white dark:bg-black ${className || ''}`}
-    >
-      {fileName && (
-        <CardHeader>
-          <div className="mb-2 text-base font-semibold text-default-700">
-            {fileName}
-          </div>
-        </CardHeader>
-      )}
-      <CardBody className="flex flex-col items-center justify-center p-0">
-        <div className="relative flex min-h-64 w-full items-center justify-center overflow-auto">
-          <div className="flex h-full max-h-full w-full max-w-full items-center justify-center overflow-hidden">
-            <Image
-              alt={alt || fileName || 'Image'}
-              className={`shadow ${loading ? 'invisible' : 'visible'}`}
-              src={src}
-              onError={() => {
-                setLoading(false);
-                setError(true);
-              }}
-              onLoad={() => setLoading(false)}
-            />
-          </div>
-        </div>
-      </CardBody>
+    <>
+    {error && <Error />}
+    {loading && <Loading />}
+    <Card isBlurred>
+      <Image 
+      src={src}
+      alt={alt}
+      className={`border-none ${className} ${loading ? 'block' : 'hidden'}`}
+      />
     </Card>
+    </>
   );
 }
 
