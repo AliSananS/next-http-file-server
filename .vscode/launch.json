@@ -17,7 +17,7 @@
          "name": "Next.js: debug client-side",
          "type": "chrome",
          "request": "launch",
-         "url": "http://localhost:3000", // Adjust port if needed
+         "url": "http://localhost:3000", 
          "webRoot": "${workspaceFolder}",
          "sourceMaps": true
        },
@@ -32,6 +32,7 @@
          "outFiles": ["${workspaceFolder}/.next/**/*.js"],
          "sourceMaps": true,
          "trace": true,
+         "outFiles": ["${workspaceFolder}/.next/server/**/*.js"],
          "preLaunchTask": "start-client-debugger" // Optional: if you want to launch client debugger automatically
        }
      ],
