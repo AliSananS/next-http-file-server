@@ -4,7 +4,6 @@ import { NextRequest } from 'next/server';
 import mime from 'mime-types';
 
 import { getData, convertParams } from '@/lib/io';
-import { log } from '@/lib/log';
 
 export async function GET(
   req: NextRequest,
