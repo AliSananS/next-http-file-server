@@ -1,40 +1,45 @@
-{
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Next.js: debug server-side",
-            "type": "node-terminal",
-            "request": "launch",
-            "command": "npm run dev",
-            "cwd": "${workspaceFolder}",
-            "internalConsoleOptions": "openOnSessionStart"
-        },
-        {
-            "name": "Next.js: debug client-side",
-            "type": "chrome",
-            "request": "launch",
-            "url": "http://localhost:3000"
-        },
-        {
-            "name": "Next.js: debug client-side (Firefox)",
-            "type": "chrome",
-            "request": "launch",
-            "url": "http://localhost:3000"
-        },
-        {
-            "name": "Next.js: debug full stack",
-            "type": "node",
-            "request": "launch",
-            "program": "${workspaceFolder}/node_modules/next/dist/bin/next",
-            "runtimeArgs": ["--inspect"],
-            "skipFiles": ["<node_internals>/**"],
-            "serverReadyAction": {
-                "action": "debugWithChrome",
-                "killOnServerStop": true,
-                "pattern": "- Local:.+(http?://.+)",
-                "uriFormat": "%s",
-                "webRoot": "${workspaceFolder}"
-            }
-        }
-    ]
-}
+   {
+     "version": "0.2.0",
+     "configurations": [
+       {
+         "name": "Next.js: debug server-side",
+         "type": "node",
+         "request": "launch",
+         "program": "${workspaceFolder}/node_modules/.bin/next",
+         "args": ["dev"],
+         "console": "integratedTerminal",
+         "skipFiles": ["<node_internals>/**"],
+         "outFiles": ["${workspaceFolder}/.next/**/*.js"],
+         "sourceMaps": true,
+         "trace": true
+       },
+       {
+         "name": "Next.js: debug client-side",
+         "type": "chrome",
+         "request": "launch",
+         "url": "http://localhost:3000", // Adjust port if needed
+         "webRoot": "${workspaceFolder}",
+         "sourceMaps": true
+       },
+       {
+         "name": "Next.js: Full-stack Debug",
+         "type": "node",
+         "request": "launch",
+         "program": "${workspaceFolder}/node_modules/.bin/next",
+         "args": ["dev"],
+         "console": "integratedTerminal",
+         "skipFiles": ["<node_internals>/**"],
+         "outFiles": ["${workspaceFolder}/.next/**/*.js"],
+         "sourceMaps": true,
+         "trace": true,
+         "preLaunchTask": "start-client-debugger" // Optional: if you want to launch client debugger automatically
+       }
+     ],
+     "compounds": [
+       {
+         "name": "Full-stack Debug (Compound)",
+         "configurations": ["Next.js: debug server-side", "Next.js: debug client-side"],
+         "stopAll": true
+       }
+     ]
+   }
