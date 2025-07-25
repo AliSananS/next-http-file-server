@@ -12,29 +12,26 @@ import {
   PasteIcon,
   AddFolderIcon,
   UploadIcon,
-  RestartIcon,
+  FolderErrorIcon,
 } from '@/components/icons';
-import { copyFileAction } from '@/app/actions';
-// import { copyFile } from '@/lib/io';
+import { copyFileAction, createFolderAction } from '@/app/actions';
 import { FileErrorMap } from '@/types/fileErrors';
 
 export function ActionButtons() {
-  // {
-  //   reloadAction,
-  //   reloading,
-  // }: {
-  //   reloadAction: VoidFunction;
-  //   reloading: boolean;
-  // }
   const router = useRouter();
   const pathname = usePathname();
   const [isPasting, startTransaction] = useTransition();
 
   const { item, clear } = useClipboard();
+
+  function ensureRelative(path: string): string {
+    return path.startsWith('/') ? path.slice(1) : path;
+  }
+
   const handlePaste = async () => {
     startTransaction(async () => {
       if (item !== null) {
-        const destinationPath = `${pathname}/${item.name}`;
+        const destinationPath = `${ensureRelative(pathname)}/${item.name}`;
         const result = await copyFileAction(item.path, destinationPath, {
           move: item.mode === 'move',
         });
@@ -57,6 +54,25 @@ export function ActionButtons() {
     });
   };
 
+  async function handleCreateFolder() {
+    const dirName = prompt('Enter the name');
+    const dirPath = `${ensureRelative(pathname)}/${dirName}`;
+
+    const result = await createFolderAction(dirPath);
+
+    if (!result.ok) {
+      addToast({
+        title: 'Error creating folder',
+        description:
+          FileErrorMap[result.error]?.message || FileErrorMap.UNKNOWN.message,
+        color: 'danger',
+        icon: <FolderErrorIcon />,
+      });
+    } else {
+      router.refresh();
+    }
+  }
+
   return (
     <div className="flex gap-2">
       {item !== null && (
@@ -76,6 +92,7 @@ export function ActionButtons() {
         endContent={<AddFolderIcon size={16} />}
         size="sm"
         variant="light"
+        onPress={handleCreateFolder}
       >
         New folder
       </Button>

@@ -81,7 +81,7 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
     copy({
       path: file.path,
       name: file.name,
-      mode: 'copy',
+      mode: move ? 'move' : 'copy',
     });
     addToast({
       title: move ? 'Cut' : 'Copied',
