@@ -14,6 +14,8 @@ import fileTypeMap from '@/lib/fileTypeMap';
 import ImageView from '@/components/ImageView';
 import VideoPlayer from '@/components/VideoPlayer';
 import { ActionButtons } from '@/components/ClientComponents';
+import AudioPlayer from '@/components/AudioPlayer';
+import { sanitizeUrlPath } from '@/lib/helpers';
 
 export default async function FilesContainer({
   filesData,
@@ -67,13 +69,16 @@ async function MainContent({ filesData }: { filesData: GetDataResult }) {
 }
 
 function FileViewer({ file }: { file: FileEntry }) {
-  const fileUrl = `/${file.path}?dl=true`;
+  const fileUrl = sanitizeUrlPath(`/${file.path}?dl=true`);
 
   if (file.type === 'image') {
     return <ImageView src={fileUrl} />;
   }
   if (file.type === 'video') {
     return <VideoPlayer src={fileUrl} />;
+  }
+  if (file.type === 'audio') {
+    return <AudioPlayer src={fileUrl} />;
   }
 }
 

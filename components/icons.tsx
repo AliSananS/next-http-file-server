@@ -17,6 +17,7 @@ const {
   TrashBinTrash,
   InfoCircle,
   Restart,
+  FullScreen,
 } = SIcons;
 
 import { IconSvgProps } from '@/types';
@@ -86,6 +87,9 @@ export const InfoIcon = (props: IconProps) => {
 
 export const RestartIcon = (props: IconProps) => {
   return <Restart {...props} weight="Outline" />;
+};
+export const FullScreenIcon = (props: IconProps) => {
+  return <FullScreen {...props} weight="Outline" />;
 };
 
 export function RenameIcon({ size, color }: { size?: number; color?: string }) {

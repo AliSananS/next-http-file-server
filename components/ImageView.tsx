@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Card, CardBody, CardHeader } from '@heroui/card';
-import { Spinner } from '@heroui/spinner';
+import { useState } from 'react';
 import { Image } from '@heroui/image';
+import { Button } from '@heroui/button';
+
+import { FullScreenIcon } from '@/components/icons';
 
 type ImageViewProps = {
   src: string;
@@ -18,29 +19,25 @@ export default function ImageView({
   fileName,
   className,
 }: ImageViewProps) {
-
-  const [error, setError] = useState(false)
+  const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
 
   return (
-    <>
-    {error && <Error />}
-    {loading && <Loading />}
-    <Card isBlurred>
-      <Image 
-      src={src}
-      alt={alt}
-      className={`border-none ${className} ${loading ? 'block' : 'hidden'}`}
-      />
-    </Card>
-    </>
-  );
-}
-
-function Loading() {
-  return (
-    <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-default-100/50">
-      <Spinner color="primary" size="lg" />
+    <div>
+      {error ? (
+        <Error />
+      ) : (
+        <Image
+          alt={alt || fileName || 'Image'}
+          className={`h-full w-full border-none ${className}`}
+          isLoading={loading}
+          loading="eager"
+          src={src}
+          width={'100%'}
+          onError={() => setError(true)}
+          onLoad={() => setLoading(false)}
+        />
+      )}
     </div>
   );
 }
