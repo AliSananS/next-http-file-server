@@ -26,14 +26,20 @@ export type FileTypesWithPreview = Extract<
   'video' | 'audio' | 'image' | 'text'
 >;
 
+export type FileTimeEntry = {
+  access: Date;
+  create: Date;
+  modified: Date;
+};
+
 export type FileEntry = {
   name: string;
   type: FileTypes;
   path: string;
   parentPath: string;
   permissions: FilePermissions;
-  size?: number;
-  time?: Date;
+  size: number;
+  time?: FileTimeEntry;
 };
 
 export type DirEntery = {
@@ -41,6 +47,8 @@ export type DirEntery = {
   path: string;
   parentPath: string;
   children: FileEntry[];
+  time: FileTimeEntry;
+  type: 'dir';
 };
 
 export type FileOperationError = {

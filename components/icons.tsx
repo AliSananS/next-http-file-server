@@ -92,11 +92,11 @@ export const FullScreenIcon = (props: IconProps) => {
   return <FullScreen {...props} weight="Outline" />;
 };
 
-export function RenameIcon({ size, color }: { size?: number; color?: string }) {
+export function RenameIcon(props: IconSvgProps) {
   return (
     <svg
       fill="none"
-      style={{ width: size || 'auto', height: size || 'auto' }}
+      style={{ width: props.size || 'auto', height: props.size || 'auto' }}
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -108,11 +108,11 @@ export function RenameIcon({ size, color }: { size?: number; color?: string }) {
   );
 }
 
-export function CopyIcon({ size, color }: { size?: number; color?: string }) {
+export function CopyIcon(props: IconSvgProps) {
   return (
     <svg
       fill="none"
-      style={{ width: size || 'auto', height: size || 'auto' }}
+      style={{ width: props.size || 'auto', height: props.size || 'auto' }}
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -123,11 +123,11 @@ export function CopyIcon({ size, color }: { size?: number; color?: string }) {
     </svg>
   );
 }
-export function CutIcon({ size, color }: { size?: number; color?: string }) {
+export function CutIcon(props: IconSvgProps) {
   return (
     <svg
       fill="none"
-      style={{ width: size || 'auto', height: size || 'auto' }}
+      style={{ width: props.size || 'auto', height: props.size || 'auto' }}
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -143,11 +143,11 @@ export function CutIcon({ size, color }: { size?: number; color?: string }) {
   );
 }
 
-export function PasteIcon({ size, color }: { size?: number; color?: string }) {
+export function PasteIcon(props: IconSvgProps) {
   return (
     <svg
       fill="none"
-      style={{ width: size || 'auto', height: size || 'auto' }}
+      style={{ width: props.size || 'auto', height: props.size || 'auto' }}
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
     >
