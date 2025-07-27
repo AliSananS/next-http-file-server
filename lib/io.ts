@@ -106,7 +106,7 @@ export async function getData(
         filesInDirectory.push({
           name: file.name,
           path: childRelPath,
-          parentPath: file.parentPath,
+          parentPath: path.dirname(childRelPath),
           permissions: 'EACCES',
           type: fileType,
           size: 0,
@@ -120,7 +120,7 @@ export async function getData(
         name: file.name,
         type: fileType,
         path: childRelPath,
-        parentPath: file.parentPath,
+        parentPath: path.dirname(childRelPath),
         permissions: filePermissions,
         time: {
           create: fileStat.ctime,
@@ -143,7 +143,7 @@ export async function getData(
       value: {
         name: path.basename(resolvedPath.path),
         path: relPath,
-        parentPath: path.dirname(resolvedPath.path),
+        parentPath: path.dirname(relPath),
         children: sortedFiles,
         type: 'dir',
         time: {

@@ -8,9 +8,10 @@ import {
 import { Button } from '@heroui/button';
 import { Tooltip } from '@heroui/tooltip';
 import { useState } from 'react';
+import { Divider } from '@heroui/divider';
 
-import { CopyIcon } from '@/components/icons'; // Or use your own icon
 import { DirEntery, FileEntry } from '@/types';
+import { humanFileSize } from '@/lib/helpers';
 
 export function FileInfoModal({
   isOpen,
@@ -30,28 +31,29 @@ export function FileInfoModal({
   };
 
   const InfoRow = ({ label, value }: { label: string; value: string }) => (
-    <div className="group flex items-center justify-between gap-4 py-1">
+    <div className="group flex flex-col gap-1 py-1">
       <div>
         <p className="text-sm text-default-400">{label}</p>
-        <p className="break-all text-base font-medium text-default-900">
-          {value}
-        </p>
       </div>
       <Tooltip
         showArrow
-        className="text-xs"
         content={copiedField === label ? 'Copied!' : 'Copy'}
         placement="top"
       >
         <button
-          className="opacity-0 transition-opacity group-hover:opacity-100"
+          className="flex w-fit items-start"
           onClick={() => copyToClipboard(label, value)}
         >
-          <CopyIcon className="text-default-400 hover:text-primary" size={16} />
+          <p className="break-all text-sm font-light text-default-900 hover:text-default-700 hover:underline">
+            {value}
+          </p>
         </button>
       </Tooltip>
     </div>
   );
+
+  const formatDate = (d: string | number | Date | undefined) =>
+    d ? new Date(d).toLocaleString() : 'N/A';
 
   return (
     <Modal
@@ -68,26 +70,20 @@ export function FileInfoModal({
       onOpenChange={onClose}
     >
       <ModalContent className="rounded-xl shadow-2xl">
-        <ModalHeader className="flex flex-col gap-1">
-          File Info
-          <span className="text-sm font-normal text-default-500">
-            Everything you need to know 🕵️‍♂️
-          </span>
-        </ModalHeader>
+        <ModalHeader>File Info</ModalHeader>
 
         <ModalBody className="space-y-2">
           <InfoRow label="Name" value={file.name} />
           <InfoRow label="Path" value={file.path} />
           {file.type !== 'dir' && (
-            <InfoRow
-              label="Size"
-              value={`${(file.size / 1024).toFixed(2)} KB`}
-            />
+            <InfoRow label="Size" value={humanFileSize(file.size, false)} />
           )}
-          <InfoRow
-            label="Last Modified"
-            value={new Date(file.time?.modified || 'N/A').toLocaleString()}
-          />
+          <Divider />
+          <div className="mt-2 pt-2">
+            <InfoRow label="Created" value={formatDate(file.time?.create)} />
+            <InfoRow label="Modified" value={formatDate(file.time?.modified)} />
+            <InfoRow label="Accessed" value={formatDate(file.time?.access)} />
+          </div>
         </ModalBody>
 
         <ModalFooter>
