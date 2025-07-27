@@ -109,6 +109,7 @@ export async function getData(
           parentPath: file.parentPath,
           permissions: 'EACCES',
           type: fileType,
+          size: 0,
         });
         continue;
       }
@@ -121,7 +122,11 @@ export async function getData(
         path: childRelPath,
         parentPath: file.parentPath,
         permissions: filePermissions,
-        time: fileDetails.ctime,
+        time: {
+          create: fileStat.ctime,
+          access: fileStat.atime,
+          modified: fileStat.mtime,
+        },
         size: fileDetails.size,
       });
     }
@@ -136,10 +141,16 @@ export async function getData(
     return {
       ok: true,
       value: {
-        name: data[0].name,
+        name: path.basename(resolvedPath.path),
         path: relPath,
-        parentPath: data[0].parentPath,
+        parentPath: path.dirname(resolvedPath.path),
         children: sortedFiles,
+        type: 'dir',
+        time: {
+          create: fileStat.ctime,
+          access: fileStat.atime,
+          modified: fileStat.mtime,
+        },
       },
     };
   }
@@ -156,7 +167,11 @@ export async function getData(
         type: fileType,
         permissions: permissions,
         size: fileStat.size,
-        time: fileStat.ctime,
+        time: {
+          create: fileStat.ctime,
+          access: fileStat.atime,
+          modified: fileStat.mtime,
+        },
       },
     };
   }

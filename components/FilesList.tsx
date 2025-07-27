@@ -38,6 +38,7 @@ import IconMap from '@/components/fileExtensionToIconMap';
 import { useClipboard } from '@/hooks/ClipboardContext';
 import { copyFileAction, deleteFileAction } from '@/app/actions';
 import { FileErrorMap } from '@/types/fileErrors';
+import { FileInfoModal } from '@/components/FileInfoModal';
 
 export default function FilesList({ files }: { files: DirEntery }) {
   return (
@@ -48,8 +49,8 @@ export default function FilesList({ files }: { files: DirEntery }) {
           className="flex h-8 w-full flex-row justify-between overflow-hidden rounded-md bg-content2/75 pl-4 hover:bg-content2 dark:bg-content1/75 hover:dark:bg-content1"
         >
           <LeftWrapper
+            href={path.join('/', file.path.toString())}
             icon={IconMap(file.type)}
-            path={path.join('/', file.path.toString())}
             title={file.name}
           />
           <RightWrapper file={file} />
@@ -61,11 +62,11 @@ export default function FilesList({ files }: { files: DirEntery }) {
 
 const LeftWrapper = ({
   title,
-  path,
+  href,
   icon,
 }: {
   title: string;
-  path: string;
+  href: string;
   icon: JSX.Element;
 }) => {
   return (
@@ -73,7 +74,7 @@ const LeftWrapper = ({
       {icon}
       <Link
         className="overflow-clip text-nowrap text-sm font-light hover:underline"
-        href={path}
+        href={href}
       >
         {title}
       </Link>
@@ -89,6 +90,7 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
   const [isRenaming, startRenameTransaction] = useTransition();
   const [isDeleting, startDeleteTransaction] = useTransition();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isFileInfoModalOpen, setIsFileInfoModalOpen] = useState(false);
 
   const copyHandler = (
     file: DirEntery | FileEntry,
@@ -131,15 +133,16 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
   };
 
   async function renameHandler(file: FileEntry) {
+    const originalName = file.name;
+    const filePath = file.path;
+    const dirname = file.parentPath;
+
+    if (originalName === newFilename || newFilename === '') {
+      setIsRenameModalOpen(false);
+
+      return;
+    }
     startRenameTransaction(async () => {
-      const originalName = file.name;
-      const filePath = file.path;
-      const dirname = file.parentPath;
-
-      if (originalName === newFilename || newFilename === '') {
-        return;
-      }
-
       const result = await copyFileAction(
         filePath,
         `${dirname}/${newFilename}`,
@@ -383,12 +386,18 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
                 key="info"
                 // description="File information"
                 startContent={<InfoIcon />}
+                onPress={() => setIsFileInfoModalOpen(true)}
               >
                 Info
               </DropdownItem>
             </DropdownSection>
           </DropdownMenu>
         </Dropdown>
+        <FileInfoModal
+          file={file}
+          isOpen={isFileInfoModalOpen}
+          onClose={() => setIsFileInfoModalOpen(false)}
+        />
       </div>
     </div>
   );
