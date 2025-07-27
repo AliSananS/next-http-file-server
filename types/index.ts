@@ -30,6 +30,7 @@ export type FileEntry = {
   name: string;
   type: FileTypes;
   path: string;
+  parentPath: string;
   permissions: FilePermissions;
   size?: number;
   time?: Date;
@@ -38,6 +39,7 @@ export type FileEntry = {
 export type DirEntery = {
   name: string;
   path: string;
+  parentPath: string;
   children: FileEntry[];
 };
 

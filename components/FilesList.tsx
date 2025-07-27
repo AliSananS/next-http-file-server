@@ -3,14 +3,27 @@ import path from 'path';
 
 import Link from 'next/link';
 import {
-  Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownSection,
   DropdownTrigger,
+  Dropdown,
 } from '@heroui/dropdown';
 import { addToast } from '@heroui/toast';
+import { Popover, PopoverContent, PopoverTrigger } from '@heroui/popover';
 import { useRouter } from 'next/navigation';
+import { Input } from '@heroui/input';
+import { useEffect, useRef, useState } from 'react';
+import { Kbd } from '@heroui/kbd';
+import { Button } from '@heroui/button';
+import {
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  useDisclosure,
+} from '@heroui/modal';
 
 import {
   CopyIcon,
@@ -70,9 +83,9 @@ const LeftWrapper = ({
 };
 
 const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
-  const fileType = file.type === 'dir' ? 'folder' : 'file';
   const { copy } = useClipboard();
   const router = useRouter();
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const copyHandler = (
     file: DirEntery | FileEntry,
@@ -86,18 +99,18 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
     addToast({
       title: move ? 'Cut' : 'Copied',
       color: 'default',
-      icon: move ? <CutIcon size={24} /> : <CopyIcon size={20} />,
+      icon: move ? <CutIcon size={20} /> : <CopyIcon size={20} />,
     });
   };
 
   const deleteHandler = async (file: DirEntery | FileEntry) => {
-    const res = await deleteFileAction(file.path);
+    const result = await deleteFileAction(file.path);
 
-    if (res.ok) {
+    if (result.ok) {
       addToast({
         title: 'Deleted',
         color: 'default',
-        icon: <DeleteIcon size={20} />,
+        icon: <DeleteIcon />,
       });
       router.refresh();
     } else {
@@ -105,18 +118,96 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
         title: 'Error deleting file',
         color: 'danger',
         description:
-          FileErrorMap[res.error]?.message || FileErrorMap.UNKNOWN.message,
-        icon: <DeleteIcon size={20} />,
+          FileErrorMap[result.error]?.message || FileErrorMap.UNKNOWN.message,
+        icon: <DeleteIcon />,
       });
     }
   };
 
   return (
     <div className="flex flex-row items-center">
+      <Modal
+        hideCloseButton
+        backdrop="blur"
+        isOpen={isOpen}
+        motionProps={{
+          variants: {
+            enter: { opacity: 1, y: 0 },
+            exit: { opacity: 0, y: -20 },
+          },
+          transition: { duration: 0.2 },
+        }}
+        onOpenChange={onOpenChange}
+      >
+        <ModalContent className="rounded-xl shadow-xl">
+          {onClose => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                Rename File
+                <span className="text-sm font-normal text-default-500">
+                  Give your file a new identity 👀
+                </span>
+              </ModalHeader>
+
+              <ModalBody>
+                <Input
+                  // eslint-disable-next-line jsx-a11y/no-autofocus
+                  autoFocus
+                  classNames={{
+                    inputWrapper: 'border-default-200 hover:border-primary',
+                    input: 'text-base font-medium',
+                  }}
+                  defaultValue={file.name}
+                  placeholder="Enter new name"
+                  radius="lg"
+                  size="lg"
+                  startContent={
+                    <span className="text-sm text-default-400">📄</span>
+                  }
+                  variant="bordered"
+                />
+              </ModalBody>
+
+              <ModalFooter>
+                <Button
+                  className="text-default-500"
+                  variant="light"
+                  onPress={onClose}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  color="primary"
+                  endContent={
+                    <Kbd
+                      classNames={{
+                        base: 'bg-transparent border-none shadow-none p-0 m-0',
+                      }}
+                      keys={['enter']}
+                    />
+                  }
+                  onPress={() => {
+                    /* handle rename */
+                  }}
+                >
+                  Save
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
+
       <div className="flex h-full w-8 items-center justify-center from-content1 to-content2 hover:cursor-pointer hover:bg-gradient-to-r">
-        <Dropdown backdrop="blur">
+        <Dropdown
+          backdrop="blur"
+          onKeyDown={e => {
+            if (e.key === 'Escape') {
+            }
+          }}
+        >
           <DropdownTrigger className="active:border-none">
-            {/* @ts-ignore //Ignore className error. */}
+            {/* @ts-ignore //Ignore classNa me error. */}
             <MenuDotsIcon
               className="rotate-90 text-default-500 focus:outline-none"
               focusable={false}
@@ -129,7 +220,7 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
                   key="download"
                   className="hover:bg-primary-50"
                   // description={`Download ${fileType}`}
-                  startContent={<DownloadIcon weight="BoldDuotone" />}
+                  startContent={<DownloadIcon />}
                   onPress={() => {
                     window.location.href = file.path + '?dl=true';
                   }}
@@ -144,12 +235,15 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
                 key="copy"
                 className="select-none"
                 // description={`Copy ${fileType} to`}
+                closeOnSelect={false}
                 startContent={
                   <div className="h-4 w-4">
                     <CopyIcon />
                   </div>
                 }
-                onPress={() => copyHandler(file)}
+                onPress={() => {
+                  copyHandler(file);
+                }}
               >
                 Copy
               </DropdownItem>
@@ -157,42 +251,37 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
               <DropdownItem
                 key="move"
                 className="select-none"
+                closeOnSelect={false}
                 // description={`Move ${fileType} to`}
                 startContent={
                   <div className="h-4 w-4">
                     <CutIcon />
                   </div>
                 }
-                onPress={() => copyHandler(file, { move: true })}
+                onPress={() => {
+                  copyHandler(file, { move: true });
+                }}
               >
                 Move
               </DropdownItem>
-
               <DropdownItem
                 key="rename"
                 className="select-none"
-                // description={`Rename ${fileType}`}
                 startContent={
                   <div className="h-4 w-4">
                     <RenameIcon />
                   </div>
                 }
-                onPress={() => {
-                  // moveFileAction(file.path);
-                }}
+                onPress={onOpen}
               >
-                Rename :TODO
+                Rename
               </DropdownItem>
             </DropdownSection>
             <DropdownSection showDivider title="Danger Zone">
               <DropdownItem
                 key="delete"
                 className="text-danger-500"
-                classNames={{
-                  description: 'text-danger-500',
-                }}
                 color="danger"
-                description={`Permanently delete ${fileType}`}
                 startContent={<DeleteIcon />}
                 variant="solid"
                 onPress={() => deleteHandler(file)}

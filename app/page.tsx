@@ -3,5 +3,5 @@
 import ShowFiles from '@/components/ShowFiles';
 
 export default async function Home() {
-  return <ShowFiles />;
+  return <ShowFiles params={['./']} />;
 }
