@@ -19,7 +19,7 @@ import { FileErrorMap } from '@/types/fileErrors';
 import { log } from '@/lib/log';
 import { sanitizeUrlPath } from '@/lib/helpers';
 
-const baseDir = process.env.BASE_DIR || process.cwd();
+const baseDir = path.resolve(process.env.BASE_DIR || process.cwd());
 
 export function getErrorMsg(code: FileErrorTypes) {
   return FileErrorMap[code]?.message || FileErrorMap.UNKNOWN.message;
@@ -106,6 +106,7 @@ export async function getData(
         filesInDirectory.push({
           name: file.name,
           path: childRelPath,
+          parentPath: file.parentPath,
           permissions: 'EACCES',
           type: fileType,
         });
@@ -118,6 +119,7 @@ export async function getData(
         name: file.name,
         type: fileType,
         path: childRelPath,
+        parentPath: file.parentPath,
         permissions: filePermissions,
         time: fileDetails.ctime,
         size: fileDetails.size,
@@ -134,8 +136,9 @@ export async function getData(
     return {
       ok: true,
       value: {
-        name: params[params.length - 1],
+        name: data[0].name,
         path: relPath,
+        parentPath: data[0].parentPath,
         children: sortedFiles,
       },
     };
@@ -147,8 +150,9 @@ export async function getData(
     return {
       ok: true,
       value: {
-        name: params[params.length - 1],
+        name: path.basename(resolvedPath.path),
         path: relPath,
+        parentPath: path.dirname(resolvedPath.path),
         type: fileType,
         permissions: permissions,
         size: fileStat.size,

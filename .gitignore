@@ -40,3 +40,7 @@ next-env.d.ts
 /files
 /files.zip
 /test-dir
+
+#lock files
+bun.lock
+package-lock.json

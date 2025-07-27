@@ -56,6 +56,11 @@ export function ActionButtons() {
 
   async function handleCreateFolder() {
     const dirName = prompt('Enter the name');
+
+    if (!dirName) {
+      return;
+    }
+
     const dirPath = `${ensureRelative(pathname)}/${dirName}`;
 
     const result = await createFolderAction(dirPath);
