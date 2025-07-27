@@ -10,10 +10,9 @@ import {
   Dropdown,
 } from '@heroui/dropdown';
 import { addToast } from '@heroui/toast';
-import { Popover, PopoverContent, PopoverTrigger } from '@heroui/popover';
 import { useRouter } from 'next/navigation';
 import { Input } from '@heroui/input';
-import { useEffect, useRef, useState } from 'react';
+import { useState, useTransition } from 'react';
 import { Kbd } from '@heroui/kbd';
 import { Button } from '@heroui/button';
 import {
@@ -37,7 +36,7 @@ import {
 import { DirEntery, FileEntry } from '@/types';
 import IconMap from '@/components/fileExtensionToIconMap';
 import { useClipboard } from '@/hooks/ClipboardContext';
-import { deleteFileAction } from '@/app/actions';
+import { copyFileAction, deleteFileAction } from '@/app/actions';
 import { FileErrorMap } from '@/types/fileErrors';
 
 export default function FilesList({ files }: { files: DirEntery }) {
@@ -85,7 +84,11 @@ const LeftWrapper = ({
 const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
   const { copy } = useClipboard();
   const router = useRouter();
-  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [newFilename, setNewFilename] = useState('');
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
+  const [isRenaming, startRenameTransaction] = useTransition();
+  const [isDeleting, startDeleteTransaction] = useTransition();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const copyHandler = (
     file: DirEntery | FileEntry,
@@ -104,32 +107,65 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
   };
 
   const deleteHandler = async (file: DirEntery | FileEntry) => {
-    const result = await deleteFileAction(file.path);
+    startDeleteTransaction(async () => {
+      const result = await deleteFileAction(file.path);
 
-    if (result.ok) {
-      addToast({
-        title: 'Deleted',
-        color: 'default',
-        icon: <DeleteIcon />,
-      });
-      router.refresh();
-    } else {
-      addToast({
-        title: 'Error deleting file',
-        color: 'danger',
-        description:
-          FileErrorMap[result.error]?.message || FileErrorMap.UNKNOWN.message,
-        icon: <DeleteIcon />,
-      });
-    }
+      if (result.ok) {
+        addToast({
+          title: 'Deleted',
+          color: 'default',
+          icon: <DeleteIcon />,
+        });
+        router.refresh();
+        setIsDeleteModalOpen(false);
+      } else {
+        addToast({
+          title: 'Error deleting file',
+          color: 'danger',
+          description:
+            FileErrorMap[result.error]?.message || FileErrorMap.UNKNOWN.message,
+          icon: <DeleteIcon />,
+        });
+      }
+    });
   };
+
+  async function renameHandler(file: FileEntry) {
+    startRenameTransaction(async () => {
+      const originalName = file.name;
+      const filePath = file.path;
+      const dirname = file.parentPath;
+
+      if (originalName === newFilename || newFilename === '') {
+        return;
+      }
+
+      const result = await copyFileAction(
+        filePath,
+        `${dirname}/${newFilename}`,
+        { move: true },
+      );
+
+      if (!result.ok) {
+        addToast({
+          title: 'Error renaming file',
+          color: 'danger',
+          description: FileErrorMap[result.error]?.message,
+          icon: <RenameIcon size={20} />,
+        });
+      } else {
+        router.refresh();
+        setIsRenameModalOpen(false);
+      }
+    });
+  }
 
   return (
     <div className="flex flex-row items-center">
       <Modal
         hideCloseButton
         backdrop="blur"
-        isOpen={isOpen}
+        isOpen={isDeleteModalOpen}
         motionProps={{
           variants: {
             enter: { opacity: 1, y: 0 },
@@ -137,64 +173,117 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
           },
           transition: { duration: 0.2 },
         }}
-        onOpenChange={onOpenChange}
+      >
+        <ModalContent className="rounded-xl border border-divider shadow-xl">
+          <ModalHeader className="flex flex-col gap-1">
+            Delete File
+            <span className="text-sm font-normal text-default-500">
+              This action is irreversible. You sure about this?
+            </span>
+          </ModalHeader>
+
+          <ModalBody>
+            <div className="flex items-center gap-3 p-1">
+              <span className="text-lg">🗑️</span>
+              <span className="text-base">
+                <strong>{file.name}</strong> will be permanently deleted.
+              </span>
+            </div>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              className="text-default-500"
+              variant="light"
+              onPress={() => setIsDeleteModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              color="danger"
+              endContent={
+                <Kbd
+                  classNames={{
+                    base: 'bg-transparent border-none shadow-none p-0 m-0',
+                  }}
+                  keys={['enter']}
+                />
+              }
+              isLoading={isDeleting}
+              onPress={() => deleteHandler(file)}
+            >
+              Delete
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      <Modal
+        hideCloseButton
+        backdrop="blur"
+        isOpen={isRenameModalOpen}
+        motionProps={{
+          variants: {
+            enter: { opacity: 1, y: 0 },
+            exit: { opacity: 0, y: -20 },
+          },
+          transition: { duration: 0.2 },
+        }}
       >
         <ModalContent className="rounded-xl shadow-xl">
-          {onClose => (
-            <>
-              <ModalHeader className="flex flex-col gap-1">
-                Rename File
-                <span className="text-sm font-normal text-default-500">
-                  Give your file a new identity 👀
-                </span>
-              </ModalHeader>
+          <ModalHeader className="flex flex-col gap-1">
+            Rename File
+            <span className="text-sm font-normal text-default-500">
+              Give your file a new identity 👀
+            </span>
+          </ModalHeader>
 
-              <ModalBody>
-                <Input
-                  // eslint-disable-next-line jsx-a11y/no-autofocus
-                  autoFocus
+          <ModalBody>
+            <Input
+              // eslint-disable-next-line jsx-a11y/no-autofocus
+              autoFocus
+              classNames={{
+                inputWrapper: 'border-default-200 hover:border-primary',
+                input: 'text-base font-medium',
+              }}
+              defaultValue={file.name}
+              placeholder="Enter new name"
+              radius="lg"
+              size="lg"
+              startContent={
+                <span className="text-sm text-default-400">📄</span>
+              }
+              variant="bordered"
+              onValueChange={text => setNewFilename(text)}
+            />
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              className="text-default-500"
+              variant="light"
+              onPress={() => setIsRenameModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              color="primary"
+              endContent={
+                <Kbd
                   classNames={{
-                    inputWrapper: 'border-default-200 hover:border-primary',
-                    input: 'text-base font-medium',
+                    base: 'bg-transparent border-none shadow-none p-0 m-0',
                   }}
-                  defaultValue={file.name}
-                  placeholder="Enter new name"
-                  radius="lg"
-                  size="lg"
-                  startContent={
-                    <span className="text-sm text-default-400">📄</span>
-                  }
-                  variant="bordered"
+                  keys={['enter']}
                 />
-              </ModalBody>
-
-              <ModalFooter>
-                <Button
-                  className="text-default-500"
-                  variant="light"
-                  onPress={onClose}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  color="primary"
-                  endContent={
-                    <Kbd
-                      classNames={{
-                        base: 'bg-transparent border-none shadow-none p-0 m-0',
-                      }}
-                      keys={['enter']}
-                    />
-                  }
-                  onPress={() => {
-                    /* handle rename */
-                  }}
-                >
-                  Save
-                </Button>
-              </ModalFooter>
-            </>
-          )}
+              }
+              isLoading={isRenaming}
+              onPress={() => {
+                renameHandler(file);
+              }}
+            >
+              Save
+            </Button>
+          </ModalFooter>
         </ModalContent>
       </Modal>
 
@@ -272,7 +361,7 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
                     <RenameIcon />
                   </div>
                 }
-                onPress={onOpen}
+                onPress={() => setIsRenameModalOpen(true)}
               >
                 Rename
               </DropdownItem>
@@ -284,7 +373,7 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
                 color="danger"
                 startContent={<DeleteIcon />}
                 variant="solid"
-                onPress={() => deleteHandler(file)}
+                onPress={() => setIsDeleteModalOpen(true)}
               >
                 Delete
               </DropdownItem>
