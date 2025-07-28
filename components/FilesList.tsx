@@ -165,6 +165,108 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
 
   return (
     <div className="flex flex-row items-center">
+      <Dropdown backdrop="blur">
+        <DropdownTrigger className="active:border-none">
+          <div className="flex h-full w-8 items-center justify-center from-content1 to-content2 hover:cursor-pointer hover:bg-gradient-to-r">
+            <MenuDotsIcon
+              className="rotate-90 text-default-500 focus:outline-none"
+              focusable={false}
+            />
+          </div>
+        </DropdownTrigger>
+        <DropdownMenu>
+          <DropdownSection>
+            {file.type !== 'dir' ? (
+              <DropdownItem
+                key="download"
+                className="hover:bg-primary-50"
+                // description={`Download ${fileType}`}
+                startContent={<DownloadIcon />}
+                onPress={() => {
+                  window.location.href = file.path + '?dl=true';
+                }}
+              >
+                Download
+              </DropdownItem>
+            ) : (
+              <></>
+            )}
+
+            <DropdownItem
+              key="copy"
+              className="select-none"
+              // description={`Copy ${fileType} to`}
+              closeOnSelect={false}
+              startContent={
+                <div className="h-4 w-4">
+                  <CopyIcon />
+                </div>
+              }
+              onPress={() => {
+                copyHandler(file);
+              }}
+            >
+              Copy
+            </DropdownItem>
+
+            <DropdownItem
+              key="move"
+              className="select-none"
+              closeOnSelect={false}
+              // description={`Move ${fileType} to`}
+              startContent={
+                <div className="h-4 w-4">
+                  <CutIcon />
+                </div>
+              }
+              onPress={() => {
+                copyHandler(file, { move: true });
+              }}
+            >
+              Move
+            </DropdownItem>
+            <DropdownItem
+              key="rename"
+              className="select-none"
+              startContent={
+                <div className="h-4 w-4">
+                  <RenameIcon />
+                </div>
+              }
+              onPress={() => setIsRenameModalOpen(true)}
+            >
+              Rename
+            </DropdownItem>
+          </DropdownSection>
+          <DropdownSection showDivider title="Danger Zone">
+            <DropdownItem
+              key="delete"
+              className="text-danger-500"
+              color="danger"
+              startContent={<DeleteIcon />}
+              variant="solid"
+              onPress={() => setIsDeleteModalOpen(true)}
+            >
+              Delete
+            </DropdownItem>
+          </DropdownSection>
+          <DropdownSection>
+            <DropdownItem
+              key="info"
+              // description="File information"
+              startContent={<InfoIcon />}
+              onPress={() => setIsFileInfoModalOpen(true)}
+            >
+              Info
+            </DropdownItem>
+          </DropdownSection>
+        </DropdownMenu>
+      </Dropdown>
+      <FileInfoModal
+        file={file}
+        isOpen={isFileInfoModalOpen}
+        onClose={() => setIsFileInfoModalOpen(false)}
+      />
       <Modal
         hideCloseButton
         backdrop="blur"
@@ -289,116 +391,6 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
           </ModalFooter>
         </ModalContent>
       </Modal>
-
-      <div className="flex h-full w-8 items-center justify-center from-content1 to-content2 hover:cursor-pointer hover:bg-gradient-to-r">
-        <Dropdown
-          backdrop="blur"
-          onKeyDown={e => {
-            if (e.key === 'Escape') {
-            }
-          }}
-        >
-          <DropdownTrigger className="active:border-none">
-            {/* @ts-ignore //Ignore classNa me error. */}
-            <MenuDotsIcon
-              className="rotate-90 text-default-500 focus:outline-none"
-              focusable={false}
-            />
-          </DropdownTrigger>
-          <DropdownMenu>
-            <DropdownSection>
-              {file.type !== 'dir' ? (
-                <DropdownItem
-                  key="download"
-                  className="hover:bg-primary-50"
-                  // description={`Download ${fileType}`}
-                  startContent={<DownloadIcon />}
-                  onPress={() => {
-                    window.location.href = file.path + '?dl=true';
-                  }}
-                >
-                  Download
-                </DropdownItem>
-              ) : (
-                <></>
-              )}
-
-              <DropdownItem
-                key="copy"
-                className="select-none"
-                // description={`Copy ${fileType} to`}
-                closeOnSelect={false}
-                startContent={
-                  <div className="h-4 w-4">
-                    <CopyIcon />
-                  </div>
-                }
-                onPress={() => {
-                  copyHandler(file);
-                }}
-              >
-                Copy
-              </DropdownItem>
-
-              <DropdownItem
-                key="move"
-                className="select-none"
-                closeOnSelect={false}
-                // description={`Move ${fileType} to`}
-                startContent={
-                  <div className="h-4 w-4">
-                    <CutIcon />
-                  </div>
-                }
-                onPress={() => {
-                  copyHandler(file, { move: true });
-                }}
-              >
-                Move
-              </DropdownItem>
-              <DropdownItem
-                key="rename"
-                className="select-none"
-                startContent={
-                  <div className="h-4 w-4">
-                    <RenameIcon />
-                  </div>
-                }
-                onPress={() => setIsRenameModalOpen(true)}
-              >
-                Rename
-              </DropdownItem>
-            </DropdownSection>
-            <DropdownSection showDivider title="Danger Zone">
-              <DropdownItem
-                key="delete"
-                className="text-danger-500"
-                color="danger"
-                startContent={<DeleteIcon />}
-                variant="solid"
-                onPress={() => setIsDeleteModalOpen(true)}
-              >
-                Delete
-              </DropdownItem>
-            </DropdownSection>
-            <DropdownSection>
-              <DropdownItem
-                key="info"
-                // description="File information"
-                startContent={<InfoIcon />}
-                onPress={() => setIsFileInfoModalOpen(true)}
-              >
-                Info
-              </DropdownItem>
-            </DropdownSection>
-          </DropdownMenu>
-        </Dropdown>
-        <FileInfoModal
-          file={file}
-          isOpen={isFileInfoModalOpen}
-          onClose={() => setIsFileInfoModalOpen(false)}
-        />
-      </div>
     </div>
   );
 };

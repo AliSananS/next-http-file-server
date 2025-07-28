@@ -64,3 +64,15 @@ export function humanFileSize(bytes: number, si = false, dp = 1) {
 
   return bytes.toFixed(dp) + ' ' + units[u];
 }
+
+import { newFolderPlaceholderMap } from '@/lib/newFolerPlaceholders';
+
+export function getRandomFolderPlaceholder() {
+  const all = [
+    ...newFolderPlaceholderMap.ideas,
+    ...newFolderPlaceholderMap.dev,
+    ...newFolderPlaceholderMap.funny,
+  ];
+
+  return all[Math.floor(Math.random() * all.length)];
+}

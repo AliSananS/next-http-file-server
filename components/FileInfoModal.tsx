@@ -1,14 +1,6 @@
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-} from '@heroui/modal';
-import { Button } from '@heroui/button';
+import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/modal';
 import { Tooltip } from '@heroui/tooltip';
 import { useState } from 'react';
-import { Divider } from '@heroui/divider';
 
 import { DirEntery, FileEntry } from '@/types';
 import { humanFileSize } from '@/lib/helpers';
@@ -78,23 +70,12 @@ export function FileInfoModal({
           {file.type !== 'dir' && (
             <InfoRow label="Size" value={humanFileSize(file.size, false)} />
           )}
-          <Divider />
           <div className="mt-2 pt-2">
             <InfoRow label="Created" value={formatDate(file.time?.create)} />
             <InfoRow label="Modified" value={formatDate(file.time?.modified)} />
             <InfoRow label="Accessed" value={formatDate(file.time?.access)} />
           </div>
         </ModalBody>
-
-        <ModalFooter>
-          <Button
-            className="text-default-500"
-            variant="light"
-            onPress={onClose}
-          >
-            Close
-          </Button>
-        </ModalFooter>
       </ModalContent>
     </Modal>
   );

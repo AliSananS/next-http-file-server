@@ -1,11 +1,18 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { Button, ButtonGroup } from '@heroui/button';
-import { usePathname } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { useTransition, useState } from 'react';
+import { Button } from '@heroui/button';
+import { Input } from '@heroui/input';
+import {
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from '@heroui/modal';
+import { Kbd } from '@heroui/kbd';
 import { addToast } from '@heroui/toast';
-import { useState, Suspense, useTransition } from 'react';
-import { Spinner } from '@heroui/spinner';
 
 import { useClipboard } from '@/hooks/ClipboardContext';
 import {
@@ -13,24 +20,29 @@ import {
   AddFolderIcon,
   UploadIcon,
   FolderErrorIcon,
+  FolderIcon,
 } from '@/components/icons';
 import { copyFileAction, createFolderAction } from '@/app/actions';
 import { FileErrorMap } from '@/types/fileErrors';
+import { getRandomFolderPlaceholder } from '@/lib/helpers';
+
+function ensureRelative(path: string): string {
+  return path.startsWith('/') ? path.slice(1) : path;
+}
 
 export function ActionButtons() {
   const router = useRouter();
   const pathname = usePathname();
-  const [isPasting, startTransaction] = useTransition();
-
   const { item, clear } = useClipboard();
+  const [isPasting, startTransition] = useTransition();
 
-  function ensureRelative(path: string): string {
-    return path.startsWith('/') ? path.slice(1) : path;
-  }
+  const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
+  const [folderName, setFolderName] = useState('');
+  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
 
   const handlePaste = async () => {
-    startTransaction(async () => {
-      if (item !== null) {
+    startTransition(async () => {
+      if (item) {
         const destinationPath = `${ensureRelative(pathname)}/${item.name}`;
         const result = await copyFileAction(item.path, destinationPath, {
           move: item.mode === 'move',
@@ -43,10 +55,8 @@ export function ActionButtons() {
           clear();
           router.refresh();
         } else {
-          console.log('Error Code:', result.error);
           addToast({
-            title:
-              FileErrorMap[result.error as keyof typeof FileErrorMap]?.message,
+            title: FileErrorMap[result.error]?.message,
             color: 'danger',
           });
         }
@@ -54,15 +64,11 @@ export function ActionButtons() {
     });
   };
 
-  async function handleCreateFolder() {
-    const dirName = prompt('Enter the name');
+  const handleCreateFolder = async () => {
+    if (!folderName.trim()) return;
 
-    if (!dirName) {
-      return;
-    }
-
-    const dirPath = `${ensureRelative(pathname)}/${dirName}`;
-
+    setIsCreatingFolder(true);
+    const dirPath = `${ensureRelative(pathname)}/${folderName.trim()}`;
     const result = await createFolderAction(dirPath);
 
     if (!result.ok) {
@@ -75,35 +81,146 @@ export function ActionButtons() {
       });
     } else {
       router.refresh();
+      setIsCreateFolderModalOpen(false);
+      setFolderName('');
     }
-  }
+
+    setIsCreatingFolder(false);
+  };
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+
+    if (!files || files.length === 0) return;
+
+    const formData = new FormData();
+
+    Array.from(files).forEach(file => {
+      formData.append('files', file);
+    });
+
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (res.ok) {
+      addToast({ title: 'Upload successful' });
+      router.refresh();
+    } else {
+      addToast({ title: 'Upload failed', color: 'danger' });
+    }
+  };
 
   return (
-    <div className="flex gap-2">
-      {item !== null && (
+    <>
+      <input
+        multiple
+        className="hidden"
+        id="uploadInput"
+        type="file"
+        onChange={handleUpload}
+      />
+      <div className="flex gap-2">
+        {item && (
+          <Button
+            className="mr-2"
+            color="default"
+            isLoading={isPasting}
+            size="sm"
+            startContent={<PasteIcon size={16} />}
+            onPress={handlePaste}
+          >
+            Paste
+          </Button>
+        )}
+
         <Button
-          className="mr-2"
+          as="label"
           color="default"
-          isLoading={isPasting}
+          endContent={<AddFolderIcon size={16} />}
+          htmlFor="uploadInput"
           size="sm"
-          startContent={<PasteIcon size={16} />}
-          onPress={handlePaste}
+          variant="light"
+          onPress={() => setIsCreateFolderModalOpen(true)}
         >
-          Paste
+          New folder
         </Button>
-      )}
-      <Button
-        color="default"
-        endContent={<AddFolderIcon size={16} />}
-        size="sm"
-        variant="light"
-        onPress={handleCreateFolder}
+
+        <Button color="primary" endContent={<UploadIcon size={16} />} size="sm">
+          Upload
+        </Button>
+      </div>
+
+      {/* Create Folder Modal */}
+      <Modal
+        hideCloseButton
+        backdrop="blur"
+        isOpen={isCreateFolderModalOpen}
+        motionProps={{
+          variants: {
+            enter: { opacity: 1, y: 0 },
+            exit: { opacity: 0, y: -20 },
+          },
+          transition: { duration: 0.2 },
+        }}
+        onOpenChange={() => setIsCreateFolderModalOpen(false)}
       >
-        New folder
-      </Button>
-      <Button color="primary" endContent={<UploadIcon size={16} />} size="sm">
-        Upload
-      </Button>
-    </div>
+        <ModalContent className="rounded-xl shadow-xl">
+          <ModalHeader className="flex flex-col gap-1">
+            Create Folder
+            <span className="text-sm font-normal text-default-500">
+              What do we name it?
+            </span>
+          </ModalHeader>
+
+          <ModalBody>
+            <Input
+              // eslint-disable-next-line jsx-a11y/no-autofocus
+              autoFocus
+              classNames={{
+                inputWrapper: 'border-default-200 hover:border-primary',
+                input: 'text-base font-medium',
+              }}
+              placeholder={getRandomFolderPlaceholder()}
+              radius="lg"
+              size="lg"
+              startContent={<FolderIcon />}
+              value={folderName}
+              variant="bordered"
+              onValueChange={setFolderName}
+            />
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              className="text-default-500"
+              variant="light"
+              onPress={() => {
+                setIsCreateFolderModalOpen(false);
+                setFolderName('');
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              color="primary"
+              endContent={
+                <Kbd
+                  classNames={{
+                    base: 'bg-transparent border-none shadow-none p-0 m-0',
+                  }}
+                  keys={['enter']}
+                />
+              }
+              isLoading={isCreatingFolder}
+              onPress={handleCreateFolder}
+            >
+              Create
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+    </>
   );
 }
