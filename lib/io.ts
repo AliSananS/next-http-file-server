@@ -364,3 +364,42 @@ export async function createFolder(
     return { ok: false, error: code };
   }
 }
+
+export async function writeFile(
+  relPath: string,
+  file: File,
+): Promise<Result<string, FileErrorTypes>> {
+  const resolvedPath = resolveWithBaseDir(relPath);
+
+  if (!resolvedPath.ok) {
+    return {
+      ok: false,
+      error: resolvedPath.code,
+    };
+  }
+  if (
+    !(await checkFilePermissions(path.dirname(resolvedPath.path))).includes(
+      'write',
+    )
+  ) {
+    return {
+      ok: false,
+      error: 'EACCES',
+    };
+  }
+  if (existsSync(resolvedPath.path)) {
+    return {
+      ok: false,
+      error: 'EEXIST',
+    };
+  }
+
+  const fileBuffer = Buffer.from(await file.arrayBuffer());
+
+  await fs.writeFile(resolvedPath.path, fileBuffer);
+
+  return {
+    ok: true,
+    value: relPath,
+  };
+}
