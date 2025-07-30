@@ -25,6 +25,7 @@ import {
 import { copyFileAction, createFolderAction } from '@/app/actions';
 import { FileErrorMap } from '@/types/fileErrors';
 import { getRandomFolderPlaceholder } from '@/lib/helpers';
+import UploadModal from '@/components/UploadModal';
 
 function ensureRelative(path: string): string {
   return path.startsWith('/') ? path.slice(1) : path;
@@ -39,6 +40,7 @@ export function ActionButtons() {
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
   const [folderName, setFolderName] = useState('');
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   const handlePaste = async () => {
     startTransition(async () => {
@@ -146,8 +148,12 @@ export function ActionButtons() {
         >
           New folder
         </Button>
-
-        <Button color="primary" endContent={<UploadIcon size={16} />} size="sm">
+        <Button
+          color="primary"
+          endContent={<UploadIcon size={16} />}
+          size="sm"
+          onPress={() => setIsUploadModalOpen(true)}
+        >
           Upload
         </Button>
       </div>
@@ -221,6 +227,11 @@ export function ActionButtons() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+      <UploadModal
+        filePath={ensureRelative(pathname)}
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+      />
     </>
   );
 }

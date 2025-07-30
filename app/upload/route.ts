@@ -1,28 +1,28 @@
-import { writeFile } from 'fs/promises';
+'use server';
 import path from 'path';
 
 import { NextRequest, NextResponse } from 'next/server';
 
+import { writeFile } from '@/lib/io';
+import { log } from '@/lib/log';
+
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
   const files = formData.getAll('files') as File[];
+  const uploadPath = formData.getAll('path')[0] as string;
 
-  try {
-    for (const file of files) {
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const uploadPath = path.join(process.cwd(), 'uploads', file.name);
+  for (const file of files) {
+    const filePath = path.join(uploadPath, file.name);
 
-      await writeFile(uploadPath, buffer);
+    const result = await writeFile(filePath, file);
+
+    if (!result.ok) {
+      return NextResponse.json(
+        { ok: false, error: result.error },
+        { status: 500 },
+      );
     }
 
     return NextResponse.json({ ok: true });
-  } catch (err) {
-    console.error('Upload error:', err);
-
-    return NextResponse.json(
-      { ok: false, error: 'UPLOAD_FAILED' },
-      { status: 500 },
-    );
   }
 }
