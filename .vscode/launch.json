@@ -22,7 +22,7 @@
         "name": "Next.js: debug client-side",
         "type": "chrome",
         "request": "launch",
-        "url": "http://localhost:3000",
+        "url": "http://localhost:3000/test-dir",
         "webRoot": "${workspaceFolder}",
         "sourceMaps": true,
         "sourceMapPathOverrides": {

@@ -49,6 +49,26 @@ export function convertParams(params: string[]): string {
   return sanitizeUrlPath(path);
 }
 
+export function fileExists(relPath: string): Result<boolean, FileErrorTypes> {
+  const resolved = resolveWithBaseDir(relPath);
+
+  if (!resolved.ok) {
+    return {
+      ok: false,
+      error: resolved.code,
+    };
+  }
+
+  if (!existsSync(resolved.path)) {
+    return {
+      ok: true,
+      value: false,
+    };
+  }
+
+  return { ok: true, value: true };
+}
+
 export async function getData(
   params: string[] = ['./'],
 ): Promise<GetDataResult> {

@@ -171,6 +171,7 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
             <MenuDotsIcon
               className="rotate-90 text-default-500 focus:outline-none"
               focusable={false}
+              weight="Bold"
             />
           </div>
         </DropdownTrigger>

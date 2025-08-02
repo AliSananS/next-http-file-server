@@ -18,12 +18,14 @@ const {
   InfoCircle,
   Restart,
   FullScreen,
+  Backspace,
+  CloudUpload,
 } = SIcons;
 
 import { IconSvgProps } from '@/types';
 
 export const Logo = (props: IconProps) => {
-  return <FolderWithFiles {...props} weight="Outline" />;
+  return <FolderWithFiles {...props} weight={props.weight || 'Outline'} />;
 };
 
 export const SettingsIcon = (props: IconProps) => {
@@ -31,64 +33,72 @@ export const SettingsIcon = (props: IconProps) => {
     <Settings
       className="cursor-pointer hover:opacity-75"
       {...props}
-      weight="Outline"
+      weight={props.weight || 'Outline'}
     />
   );
 };
 
 export const UploadIcon = (props: IconProps) => {
-  return <Upload {...props} weight="Outline" />;
+  return <Upload {...props} weight={props.weight || 'Outline'} />;
 };
 
 export const AddFolderIcon = (props: IconProps) => {
-  return <AddFolder {...props} weight="Outline" />;
+  return <AddFolder {...props} weight={props.weight || 'BoldDuotone'} />;
 };
 
 export const FolderIcon = (props: IconProps) => {
-  return <Folder {...props} weight="BoldDuotone" />;
+  return <Folder {...props} weight={props.weight || 'BoldDuotone'} />;
 };
 
 export const MenuDotsIcon = (props: IconProps) => {
-  return <MenuDots {...props} weight="Bold" />;
+  return <MenuDots {...props} weight={props.weight || 'Outline'} />;
 };
 
 export const FileIcon = (props: IconProps) => {
-  return <File {...props} weight="Outline" />;
+  return <File {...props} weight={props.weight || 'BoldDuotone'} />;
 };
 
 export const FileRightIcon = (props: IconProps) => {
-  return <FileRight {...props} weight="Outline" />;
+  return <FileRight {...props} weight={props.weight || 'BoldDuotone'} />;
 };
 
 export const FolderErrorIcon = (props: IconProps) => {
-  return <FolderError {...props} weight="Outline" />;
+  return <FolderError {...props} weight={props.weight || 'BoldDuotone'} />;
 };
 
 export const ErrorIcon = (props: IconProps) => {
-  return <DangerCircle {...props} weight="Outline" />;
+  return <DangerCircle {...props} weight={props.weight || 'Outline'} />;
 };
 
 export const HomeIcon = (props: IconProps) => {
-  return <Home {...props} weight="Outline" />;
+  return <Home {...props} weight={props.weight || 'Outline'} />;
 };
 
 export const DownloadIcon = (props: IconProps) => {
-  return <DownloadMinimalistic {...props} />;
+  return <DownloadMinimalistic {...props} weight={props.weight || 'Outline'} />;
 };
 
 export const DeleteIcon = (props: IconProps) => {
-  return <TrashBinTrash {...props} weight="Outline" />;
+  return <TrashBinTrash {...props} weight={props.weight || 'Outline'} />;
 };
 
 export const InfoIcon = (props: IconProps) => {
-  return <InfoCircle {...props} weight="Outline" />;
+  return <InfoCircle {...props} weight={props.weight || 'Outline'} />;
 };
 
 export const RestartIcon = (props: IconProps) => {
-  return <Restart {...props} weight="Outline" />;
+  return <Restart {...props} weight={props.weight || 'Outline'} />;
 };
 export const FullScreenIcon = (props: IconProps) => {
-  return <FullScreen {...props} weight="Outline" />;
+  return <FullScreen {...props} weight={props.weight || 'Outline'} />;
+};
+
+export const BackspaceIcon = (props: IconProps) => {
+  return <Backspace {...props} weight={props.weight || 'Outline'} />;
+};
+
+export const UploadCloudIcon = (props: IconProps) => {
+  return <CloudUpload {...props} weight={props.weight || 'BoldDuotone'} />;
 };
 
 export function RenameIcon(props: IconSvgProps) {

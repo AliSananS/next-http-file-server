@@ -9,6 +9,7 @@ import { ThemeProvider as NextThemesProvider } from 'next-themes';
 import { ToastProvider } from '@heroui/toast';
 
 import { ClipboardProvider } from '@/hooks/ClipboardContext';
+import { DropzoneProvider } from '@/hooks/DropzoneContext';
 
 export interface ProvidersProps {
   children: React.ReactNode;
@@ -30,7 +31,9 @@ export function Providers({ children, themeProps }: ProvidersProps) {
     <HeroUIProvider navigate={router.push}>
       <ClipboardProvider>
         <ToastProvider placement="top-right" toastOffset={16} />
-        <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
+        <DropzoneProvider>
+          <NextThemesProvider {...themeProps}>{children}</NextThemesProvider>
+        </DropzoneProvider>
       </ClipboardProvider>
     </HeroUIProvider>
   );

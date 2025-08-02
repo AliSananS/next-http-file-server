@@ -1,4 +1,3 @@
-// lib/logger.ts
 type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'silent';
 
 const LOG_LEVELS: Record<LogLevel, number> = {

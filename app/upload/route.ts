@@ -4,7 +4,7 @@ import path from 'path';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { writeFile } from '@/lib/io';
-import { log } from '@/lib/log';
+import ErrorCodeMap from '@/types/ErrorCodeMap';
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
@@ -17,12 +17,14 @@ export async function POST(req: NextRequest) {
     const result = await writeFile(filePath, file);
 
     if (!result.ok) {
-      return NextResponse.json(
-        { ok: false, error: result.error },
-        { status: 500 },
-      );
+      if (result.error === 'EACCES') {
+        return NextResponse.json(
+          { ok: false, error: result.error },
+          { status: ErrorCodeMap[result.error] || 500 },
+        );
+      }
     }
-
-    return NextResponse.json({ ok: true });
   }
+
+  return NextResponse.json({ ok: true });
 }
