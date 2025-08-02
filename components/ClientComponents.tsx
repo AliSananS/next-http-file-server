@@ -90,39 +90,8 @@ export function ActionButtons() {
     setIsCreatingFolder(false);
   };
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-
-    if (!files || files.length === 0) return;
-
-    const formData = new FormData();
-
-    Array.from(files).forEach(file => {
-      formData.append('files', file);
-    });
-
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (res.ok) {
-      addToast({ title: 'Upload successful' });
-      router.refresh();
-    } else {
-      addToast({ title: 'Upload failed', color: 'danger' });
-    }
-  };
-
   return (
     <>
-      <input
-        multiple
-        className="hidden"
-        id="uploadInput"
-        type="file"
-        onChange={handleUpload}
-      />
       <div className="flex gap-2">
         {item && (
           <Button
@@ -228,6 +197,7 @@ export function ActionButtons() {
         </ModalContent>
       </Modal>
       <UploadModal
+        multiple
         filePath={ensureRelative(pathname)}
         isOpen={isUploadModalOpen}
         onClose={() => setIsUploadModalOpen(false)}

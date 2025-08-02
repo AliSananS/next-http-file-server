@@ -1,176 +1,99 @@
 'use client';
-import { useState, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-} from '@heroui/modal';
-import { Button } from '@heroui/button';
-import { Kbd } from '@heroui/kbd';
-import { addToast } from '@heroui/toast';
-import clsx from 'clsx';
-import { useRouter } from 'next/navigation';
+import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/modal';
+import React, { useState } from 'react';
 
-import { FileErrorMap } from '@/types/fileErrors';
-import { FileErrorTypes } from '@/types';
+import { useDropzoneContext } from '@/hooks/DropzoneContext';
+import { UploadCloudIcon } from '@/components/icons';
+import { FileTypes } from '@/types';
+import { useFileUpload } from '@/hooks/useFileUpload';
+
+type Props = {
+  multiple?: boolean;
+  onClose: () => void;
+  isOpen: boolean;
+  filePath?: string;
+};
+
+type UploadFileEntry = {
+  file: File;
+  isUploading: boolean;
+  error: boolean;
+  errorMessage?: string;
+  progress: number;
+  size: number;
+  name: string;
+  type?: FileTypes;
+  status: 'pending' | 'uploading' | 'completed' | 'error';
+  id: string;
+};
 
 export default function UploadModal({
-  isOpen,
-  onOpenChange,
+  multiple,
   onClose,
-  props,
-  multiple = false,
+  isOpen,
   filePath,
-}: {
-  isOpen: boolean;
-  onOpenChange?: VoidFunction;
-  onClose?: VoidFunction;
-  props?: any;
-  multiple?: boolean;
-  filePath: string;
-}) {
-  const [files, setFiles] = useState<File[]>([]);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadStatus, setUploadStatus] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
-  const router = useRouter();
+}: Props) {
+  const {
+    acceptedFiles,
+    open,
+    getInputProps,
+    getRootProps,
+    isDragActive,
+    inputRef,
+    rejectedFiles,
+    isFileDialogActive,
+  } = useDropzoneContext();
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    setFiles(prev => [...prev, ...acceptedFiles]);
-  }, []);
+  const { upload, isUploading, progress, abort } = useFileUpload();
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    multiple,
-  });
-
-  const handleUpload = async () => {
-    if (!files.length) return;
-
-    setIsUploading(true);
-
-    const formData = new FormData();
-
-    files.forEach(file => formData.append('files', file));
-    formData.append('path', filePath);
-
-    const xhr = new XMLHttpRequest();
-
-    xhr.upload.onprogress = event => {
-      if (event.lengthComputable) {
-        const percentCompleted = Math.round((event.loaded * 100) / event.total);
-
-        setUploadProgress(percentCompleted);
-      }
-    };
-
-    xhr.onerror = () => {
-      setUploadStatus('An error occurred during upload.');
-    };
-
-    xhr.open('POST', '/api/upload'); // Replace with your actual upload endpoint
-    xhr.send(formData);
-
-    const res = xhr.response();
-
-    if (res.ok) {
-      addToast({ title: 'Upload complete 🎉' });
-      setFiles([]);
-      onClose?.();
-      router.refresh();
-      setIsUploading(false);
-
-      return;
-    }
-
-    if (xhr.responseType === 'json') {
-      const data = xhr.response;
-
-      const error = data.error as FileErrorTypes;
-
-      addToast({
-        title: 'Upload failed',
-        color: 'danger',
-        description:
-          FileErrorMap[error].message || FileErrorMap.UNKNOWN.message,
-      });
-      setIsUploading(false);
-    }
-  };
+  const handleUpload = async () => {};
 
   return (
     <Modal
-      backdrop="blur"
+      classNames={{ base: 'bg-white dark:bg-black border-1 border-divider' }}
       isOpen={isOpen}
       onClose={onClose}
-      onOpenChange={onOpenChange}
-      {...props}
     >
-      <ModalContent className="rounded-xl shadow-2xl">
-        <ModalHeader className="text-xl font-semibold">
-          Upload Files
-        </ModalHeader>
-
+      <ModalContent>
+        <Header />
         <ModalBody>
-          <div
-            {...getRootProps()}
-            className={clsx(
-              'relative flex h-48 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-default-400 transition-all duration-200',
-              isDragActive
-                ? 'border-primary bg-primary/10'
-                : 'hover:bg-content2/50',
-            )}
-          >
-            <input {...getInputProps()} />
-            <p className="text-sm text-default-500">
-              {isDragActive
-                ? 'Drop your files here 👇'
-                : 'Drag & drop files or click to browse'}
-            </p>
+          <div className="flex sm:flex-col">
+            <UploadButton inputProps={getInputProps} rootProps={getRootProps} />
           </div>
-
-          {files.length > 0 && (
-            <ul className="mt-4 max-h-32 overflow-y-auto text-sm text-default-700 dark:text-default-300">
-              {files.map(file => (
-                <li key={file.name} className="truncate">
-                  📄 {file.name}
-                </li>
-              ))}
-            </ul>
-          )}
         </ModalBody>
-
-        <ModalFooter>
-          <Button
-            className="text-default-500"
-            variant="light"
-            onPress={() => {
-              setFiles([]);
-              onClose?.();
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            color="primary"
-            endContent={
-              <Kbd
-                classNames={{
-                  base: 'bg-transparent border-none shadow-none p-0 m-0',
-                }}
-                keys={['enter']}
-              />
-            }
-            isLoading={isUploading}
-            onPress={handleUpload}
-          >
-            Upload
-          </Button>
-        </ModalFooter>
       </ModalContent>
     </Modal>
   );
 }
+
+const Header = () => <ModalHeader>Upload Files</ModalHeader>;
+
+const UploadButton = ({
+  rootProps,
+  inputProps,
+}: {
+  rootProps: Function;
+  inputProps: Function;
+}) => {
+  return (
+    <div
+      className="flex h-32 w-full border-spacing-2 cursor-pointer items-center justify-center rounded-xl border-2 border-dashed border-divider bg-content1/50 transition-colors duration-300 hover:bg-content1/75"
+      {...rootProps()}
+    >
+      <span className="flex h-full w-full flex-col items-center justify-center transition-transform duration-300 hover:scale-105">
+        <UploadCloudIcon size={48} weight="LineDuotone" />
+        <p className="text-sm font-light text-default-600">
+          Drag and drop files here
+        </p>
+        <p className="text-sm font-bold text-default-700 underline underline-offset-2 hover:text-foreground">
+          or browse
+        </p>
+      </span>
+      <input {...inputProps()} />
+    </div>
+  );
+};
+
+const FilesList = ({ files }: { files: UploadFileEntry[] }) => {
+  return <ul />;
+};
