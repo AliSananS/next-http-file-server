@@ -10,12 +10,15 @@ Community pull requests are welcome.
 ---
 
 ## ✨ Features — Ready ✅
-- **File uploads** with drag-and-drop support
-- **Create, delete, move, rename, and copy** files directly on the server
+- **Preview Files** — Videos, Images and Audio.
+- **File Info** — Size, Path and Date, etc.
+- **File uploads** With Drag & Drop Support
+- **Create, Delete, Move, Rename, and Copy** files directly on the server
 
 ---
 
 ## 🚧 Features — Not Ready (Coming Soon)
+- **Text Preview** + Syntax Highlighting 🎨
 - **Authentication**
 - **Search**
 - **Secure file operations** (e.g., permission checks for delete, move, copy)
