@@ -22,6 +22,7 @@ const {
   CloudUpload,
   CloseCircle,
   RestartCircle,
+  FolderOpen,
 } = ServerIcons;
 
 import { IconSvgProps } from '@/types';
@@ -44,12 +45,16 @@ export const UploadIcon = (props: IconProps) => {
   return <Upload {...props} weight={props.weight || 'Outline'} />;
 };
 
-export const AddFolderIcon = (props: IconProps) => {
-  return <AddFolder {...props} weight={props.weight || 'BoldDuotone'} />;
-};
-
 export const FolderIcon = (props: IconProps) => {
   return <Folder {...props} weight={props.weight || 'BoldDuotone'} />;
+};
+
+export const FolderOpenIcon = (props: IconProps) => {
+  return <FolderOpen {...props} weight={props.weight || 'BoldDuotone'} />;
+};
+
+export const AddFolderIcon = (props: IconProps) => {
+  return <AddFolder {...props} weight={props.weight || 'BoldDuotone'} />;
 };
 
 export const MenuDotsIcon = (props: IconProps) => {
