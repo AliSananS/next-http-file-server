@@ -41,7 +41,6 @@
     "@react-aria/visually-hidden": "3.8.24",
     "@solar-icons/react": "^1.0.1",
     "arg": "^5.0.2",
-    "axios": "^1.11.0",
     "clsx": "2.1.1",
     "framer-motion": "11.13.1",
     "intl-messageformat": "10.7.16",
