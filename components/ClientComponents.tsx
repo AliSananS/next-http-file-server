@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, usePathname } from 'next/navigation';
-import { useTransition, useState } from 'react';
+import { useTransition, useState, useEffect } from 'react';
 import { Button } from '@heroui/button';
 import { Input } from '@heroui/input';
 import {
@@ -26,6 +26,7 @@ import { copyFileAction, createFolderAction } from '@/app/actions';
 import { FileErrorMap } from '@/types/fileErrors';
 import { getRandomFolderPlaceholder } from '@/lib/helpers';
 import UploadModal from '@/components/UploadModal';
+import { useDropzoneContext } from '@/hooks/DropzoneContext';
 
 function ensureRelative(path: string): string {
   return path.startsWith('/') ? path.slice(1) : path;
@@ -36,11 +37,12 @@ export function ActionButtons() {
   const pathname = usePathname();
   const { item, clear } = useClipboard();
   const [isPasting, startTransition] = useTransition();
+  const { isUploadModalOpen, setIsUploadModalOpen, isFileBeingDragged } =
+    useDropzoneContext();
 
   const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
   const [folderName, setFolderName] = useState('');
   const [isCreatingFolder, setIsCreatingFolder] = useState(false);
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
   const handlePaste = async () => {
     startTransition(async () => {
@@ -109,7 +111,7 @@ export function ActionButtons() {
         <Button
           as="label"
           color="default"
-          endContent={<AddFolderIcon size={16} />}
+          endContent={<AddFolderIcon size={16} weight="Outline" />}
           htmlFor="uploadInput"
           size="sm"
           variant="light"

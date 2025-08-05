@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { IconProps, SSR as SIcons } from '@solar-icons/react';
+import { IconProps, SSR as ServerIcons } from '@solar-icons/react';
 
 const {
   FolderWithFiles,
@@ -20,7 +20,9 @@ const {
   FullScreen,
   Backspace,
   CloudUpload,
-} = SIcons;
+  CloseCircle,
+  RestartCircle,
+} = ServerIcons;
 
 import { IconSvgProps } from '@/types';
 
@@ -98,8 +100,52 @@ export const BackspaceIcon = (props: IconProps) => {
 };
 
 export const UploadCloudIcon = (props: IconProps) => {
-  return <CloudUpload {...props} weight={props.weight || 'BoldDuotone'} />;
+  return <CloudUpload {...props} weight={props.weight || 'Outline'} />;
 };
+
+export const CloseCircleIcon = (props: IconProps) => {
+  return <CloseCircle {...props} weight={props.weight || 'Outline'} />;
+};
+
+export const RestartCircleIcon = (props: IconProps) => {
+  return <RestartCircle {...props} weight={props.weight || 'Outline'} />;
+};
+
+export function CheckmarkIcon(props: IconProps) {
+  return (
+    <svg
+      fill="none"
+      height="24"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path
+        d="M4.53 12.97a.75.75 0 0 0-1.06 1.06l4.5 4.5a.75.75 0 0 0 1.06 0l11-11a.75.75 0 0 0-1.06-1.06L8.5 16.94l-3.97-3.97Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+export function CloseIcon(props: IconProps) {
+  return (
+    <svg
+      fill="none"
+      height="24"
+      viewBox="0 0 24 24"
+      width="24"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      <path
+        d="m4.397 4.554.073-.084a.75.75 0 0 1 .976-.073l.084.073L12 10.939l6.47-6.47a.75.75 0 1 1 1.06 1.061L13.061 12l6.47 6.47a.75.75 0 0 1 .072.976l-.073.084a.75.75 0 0 1-.976.073l-.084-.073L12 13.061l-6.47 6.47a.75.75 0 0 1-1.06-1.061L10.939 12l-6.47-6.47a.75.75 0 0 1-.072-.976l.073-.084-.073.084Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
 
 export function RenameIcon(props: IconSvgProps) {
   return (

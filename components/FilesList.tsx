@@ -34,7 +34,7 @@ import {
   RenameIcon,
 } from '@/components/icons';
 import { DirEntery, FileEntry } from '@/types';
-import IconMap from '@/components/fileExtensionToIconMap';
+import IconMap from '@/components/FileIconMap';
 import { useClipboard } from '@/hooks/ClipboardContext';
 import { copyFileAction, deleteFileAction } from '@/app/actions';
 import { FileErrorMap } from '@/types/fileErrors';

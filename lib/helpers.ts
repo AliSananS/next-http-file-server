@@ -41,7 +41,7 @@ export function sanitizeUrlPath(urlPath: string) {
  *
  * @return Formatted string.
  */
-export function humanFileSize(bytes: number, si = false, dp = 1) {
+export function formatFileSize(bytes: number, si = true, dp = 1) {
   const thresh = si ? 1000 : 1024;
 
   if (Math.abs(bytes) < thresh) {
@@ -66,6 +66,7 @@ export function humanFileSize(bytes: number, si = false, dp = 1) {
 }
 
 import { newFolderPlaceholderMap } from '@/lib/newFolerPlaceholders';
+import { UploadFileEntry } from '@/types';
 
 export function getRandomFolderPlaceholder() {
   const all = [
