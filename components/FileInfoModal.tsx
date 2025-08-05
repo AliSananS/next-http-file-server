@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { DirEntery, FileEntry } from '@/types';
 import { formatFileSize } from '@/lib/helpers';
+import { ModalClassNames } from '@/components/classNames';
 
 export function FileInfoModal({
   isOpen,
@@ -50,6 +51,7 @@ export function FileInfoModal({
   return (
     <Modal
       backdrop="blur"
+      classNames={{ ...ModalClassNames }}
       isOpen={isOpen}
       motionProps={{
         variants: {

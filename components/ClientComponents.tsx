@@ -27,6 +27,7 @@ import { FileErrorMap } from '@/types/fileErrors';
 import { getRandomFolderPlaceholder } from '@/lib/helpers';
 import UploadModal from '@/components/UploadModal';
 import { useDropzoneContext } from '@/hooks/DropzoneContext';
+import { ModalClassNames } from '@/components/classNames';
 
 function ensureRelative(path: string): string {
   return path.startsWith('/') ? path.slice(1) : path;
@@ -133,6 +134,7 @@ export function ActionButtons() {
       <Modal
         hideCloseButton
         backdrop="blur"
+        classNames={{ ...ModalClassNames }}
         isOpen={isCreateFolderModalOpen}
         motionProps={{
           variants: {

@@ -25,8 +25,6 @@ export function useFileUpload(): UseFileUploadReturn {
     (file: File, url: string, path: string, onComplete?: UploadCallback) => {
       const xhr = new XMLHttpRequest();
 
-      log.debug(`Uploading file: ${file.name} to ${url}`);
-
       xhrRef.current = xhr;
 
       xhr.open('POST', url);
@@ -47,29 +45,11 @@ export function useFileUpload(): UseFileUploadReturn {
         if (contentType && contentType.includes('application/json')) {
           try {
             responseData = JSON.parse(xhr.responseText);
-            log.debug('RESPONSE DATA DID PARSE!', responseData);
-          } catch {
-            log.debug('Failed to parse JSON response', xhr.responseText);
-          }
+          } catch {}
         }
-        log.debug(
-          `Upload response: ${xhr.status} - ${xhr.response}`,
-          'RESPONSE DATA',
-          responseData,
-          'RESPONSE END',
-          'TYPEOF RESPONSE',
-          typeof responseData,
-          'TYPEOF RESPONSE END',
-        );
-
         if (xhr.status >= 200 && xhr.status < 300) {
           onComplete?.(null, responseData);
-          log.debug('Upload successful', responseData);
         } else {
-          log.debug(
-            `Upload failed with status ${xhr.status}: ${xhr.statusText}`,
-            responseData,
-          );
           onComplete?.(
             typeof responseData === 'string'
               ? responseData
@@ -80,7 +60,6 @@ export function useFileUpload(): UseFileUploadReturn {
       };
 
       xhr.onerror = () => {
-        log.debug('Upload error', xhr.statusText);
         setIsUploading(false);
         onComplete?.('Network error');
       };

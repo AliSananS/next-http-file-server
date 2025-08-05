@@ -39,6 +39,7 @@ import { useClipboard } from '@/hooks/ClipboardContext';
 import { copyFileAction, deleteFileAction } from '@/app/actions';
 import { FileErrorMap } from '@/types/fileErrors';
 import { FileInfoModal } from '@/components/FileInfoModal';
+import { ModalClassNames } from '@/components/classNames';
 
 export default function FilesList({ files }: { files: DirEntery }) {
   return (
@@ -271,6 +272,7 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
       <Modal
         hideCloseButton
         backdrop="blur"
+        classNames={{ ...ModalClassNames }}
         isOpen={isDeleteModalOpen}
         motionProps={{
           variants: {
@@ -327,6 +329,7 @@ const RightWrapper = ({ file }: { file: DirEntery['children'][number] }) => {
       <Modal
         hideCloseButton
         backdrop="blur"
+        classNames={{ ...ModalClassNames }}
         isOpen={isRenameModalOpen}
         motionProps={{
           variants: {

@@ -9,7 +9,7 @@ import {
 import { Button } from '@heroui/button';
 import { CircularProgress } from '@heroui/progress';
 import { Spinner } from '@heroui/spinner';
-import { useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { addToast } from '@heroui/toast';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -21,6 +21,7 @@ import {
   CloseCircleIcon,
   ErrorIcon,
   FileIcon,
+  FolderOpenIcon,
   RestartIcon,
   UploadCloudIcon,
   UploadIcon,
@@ -31,6 +32,7 @@ import { formatFileSize } from '@/lib/helpers';
 import FileIconMap from '@/components/FileIconMap';
 import { FileErrorMap } from '@/types/fileErrors';
 import { log } from '@/lib/log';
+import { ModalClassNames } from '@/components/classNames';
 
 type Props = {
   multiple?: boolean;
@@ -99,12 +101,12 @@ export default function UploadModal({
     );
   }, [progress, uploadingFileId]);
 
-  const handleUploads = async () => {
+  const handleUploads = async (exactFiles: UploadFileEntry[] | undefined) => {
     if (!files || files.length === 0) return;
 
     // Helper to upload a single file and return a promise
     const uploadFile = (fileEntry: UploadFileEntry): Promise<void> => {
-      return new Promise<void>(resolve => {
+      return new Promise(resolve => {
         setUploadingFileId(fileEntry.id);
         setFiles(prev =>
           prev.map(file =>
@@ -128,7 +130,6 @@ export default function UploadModal({
             );
             const errorMessage: FileErrorTypes | string = err;
 
-            log.error('Upload error:', errorMessage);
             addToast({
               title: 'Error uploading file',
               description:
@@ -163,18 +164,23 @@ export default function UploadModal({
       });
     };
 
-    // Sequentially upload all pending files
-    for (const fileEntry of files.filter(f => f.status === 'pending')) {
-      await uploadFile(fileEntry);
+    if (exactFiles && exactFiles.length > 0) {
+      // If a file is provided, only upload that file
+      for (const fileEntry of exactFiles) {
+        await uploadFile(fileEntry);
+      }
+    } else {
+      // Otherwise, upload all pending files sequentially
+      for (const fileEntry of files.filter(f => f.status === 'pending')) {
+        await uploadFile(fileEntry);
+      }
     }
   };
 
   return (
     <Modal
-      className=""
-      classNames={{
-        base: 'bg-content2 dark:bg-black border-1 border-divider max-h-[80%]',
-      }}
+      backdrop="blur"
+      classNames={{ ...ModalClassNames }}
       isOpen={isOpen}
       onClose={onClose}
     >
@@ -198,6 +204,8 @@ export default function UploadModal({
                 >
                   <FilesList
                     files={files}
+                    setFiles={setFiles}
+                    startUploads={file => file && handleUploads(file)}
                     onAbort={id => abort()}
                     onClear={() => {
                       setFiles([]);
@@ -226,9 +234,9 @@ export default function UploadModal({
           <Button
             color="primary"
             spinner={<Spinner variant="dots" />}
-            onPress={handleUploads}
+            onPress={() => handleUploads(undefined)}
           >
-            Upload
+            Upload all
           </Button>
         </ModalFooter>
       </ModalContent>
@@ -250,27 +258,49 @@ const UploadButton = ({
   inputRef?: React.RefObject<HTMLInputElement>;
 }) => {
   return (
-    <div
-      className={`flex w-full flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-divider p-4 transition-all duration-500 ${isDragActive && 'border-spacing-4 scale-[1.025] border-default-500 bg-content3/50'}`}
-      {...rootProps()}
-    >
-      <div className="flex flex-col items-center justify-center gap-2">
-        <UploadIcon className="text-default-500" size={32} />
-        <p className="font-medium">Drop your files here</p>
-      </div>
-      <Button
-        className="border-default-500"
-        startContent={<FileIcon weight="Outline" />}
-        variant="bordered"
-        onPress={() => {
-          if (inputRef?.current) {
-            inputRef.current.click();
-          }
+    <div {...rootProps()} className="w-full">
+      <motion.div
+        animate={{
+          scale: isDragActive ? 1.01 : 1,
+          borderColor: isDragActive
+            ? 'var(--heroui-default-500)'
+            : 'var(--heroui-divider)',
+          backgroundColor: isDragActive
+            ? 'var(--heroui-content3)'
+            : 'transparent',
         }}
+        className="flex min-h-44 flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-6"
+        initial={false}
+        transition={{ duration: 0.25, ease: 'easeOut' }}
       >
-        Select files
-      </Button>
-      <input {...inputProps()} />
+        {isDragActive ? (
+          <>
+            <FolderOpenIcon className="text-default-500" size={48} />
+            <p className="text-lg font-semibold">Drop your files here</p>
+          </>
+        ) : (
+          <>
+            <UploadCloudIcon className="text-default-500" size={32} />
+            <p className="text-sm font-medium text-default-500">
+              Drag & drop files or click below
+            </p>
+            <Button
+              className="border-default-500"
+              startContent={<FileIcon weight="Outline" />}
+              variant="bordered"
+              onPress={() => {
+                if (inputRef?.current) {
+                  inputRef.current.click();
+                }
+              }}
+            >
+              Select files
+            </Button>
+          </>
+        )}
+
+        <input {...inputProps()} />
+      </motion.div>
     </div>
   );
 };
@@ -280,11 +310,15 @@ const FilesList = ({
   onAbort,
   onRemove,
   onClear,
+  setFiles,
+  startUploads,
 }: {
   files: UploadFileEntry[];
   onAbort: (id: string) => void;
   onRemove: (id: string) => void;
   onClear: () => void;
+  setFiles: Dispatch<SetStateAction<UploadFileEntry[]>>;
+  startUploads: (files: UploadFileEntry[]) => Promise<void>;
 }) => {
   const statusOrder = {
     uploading: 0,
@@ -301,94 +335,145 @@ const FilesList = ({
         </Button>
       </div>
 
-      <ul className="flex max-h-72 flex-col gap-2 overflow-y-scroll scrollbar-hide">
+      <ul className="flex max-h-72 flex-col overflow-y-scroll scrollbar-hide">
         <AnimatePresence initial={false}>
           {files
             .slice()
             .sort((a, b) => statusOrder[a.status] - statusOrder[b.status])
             .map(file => (
-              <motion.div
+              <motion.li
                 key={file.id}
                 layout
                 animate={{ opacity: 1, y: 0 }}
-                className="flex flex-row items-center space-x-2"
+                className="flex w-full items-center justify-between rounded-lg bg-content1 px-3 py-2 hover:bg-content1/70 dark:bg-content1/50 hover:dark:bg-content1/70"
                 exit={{ opacity: 0, y: -10 }}
                 initial={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
               >
-                <li className="flex w-full cursor-pointer items-center justify-between rounded-lg bg-content1 px-3 py-2 hover:bg-content1/70 dark:bg-content1/50 hover:dark:bg-content1/70">
-                  {/* Left */}
-                  <div className="flex items-center justify-center gap-2">
-                    {FileIconMap(file.type || 'file')}
-                    <div className="flex flex-col">
-                      <span
-                        className={`mr-2 text-sm ${
-                          file.status === 'error'
-                            ? 'text-danger'
-                            : 'text-default-foreground'
-                        }`}
+                {/* LEFT: Icon + Status + Name */}
+                <div className="flex min-w-0 items-center gap-3">
+                  {/* Animated Status Icon */}
+                  <AnimatePresence initial={false} mode="wait">
+                    {file.status === 'completed' && !file.isUploading && (
+                      <motion.span
+                        key="completed"
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.6, opacity: 0 }}
+                        initial={{ scale: 0.6, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
                       >
-                        {file.name}
-                      </span>
-                      <span className="text-xs text-default-500">
-                        {formatFileSize(file.size)}
-                      </span>
-                    </div>
-                  </div>
+                        <CheckmarkIcon className="text-success" />
+                      </motion.span>
+                    )}
 
-                  {/* Right */}
-                  <div className="flex size-8 items-center justify-center">
+                    {file.status === 'error' && !file.isUploading && (
+                      <motion.span
+                        key="error"
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.6, opacity: 0 }}
+                        initial={{ scale: 0.6, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <ErrorIcon className="text-danger" />
+                      </motion.span>
+                    )}
+
                     {file.isUploading && (
-                      <div className="flex items-center justify-center gap-1">
+                      <motion.span
+                        key="uploading"
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.6, opacity: 0 }}
+                        initial={{ scale: 0.6, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
                         <CircularProgress
                           color={file.progress === 100 ? 'success' : 'primary'}
                           showValueLabel={true}
                           size="md"
-                          value={file.progress}
+                          value={
+                            file.progress === 100 ? undefined : file.progress
+                          }
                         />
-                      </div>
+                      </motion.span>
                     )}
+                  </AnimatePresence>
 
-                    {!file.isUploading && file.status !== 'completed' && (
-                      <Button
-                        isIconOnly
-                        size="sm"
-                        startContent={
-                          <BackspaceIcon
-                            className="text-default-500"
-                            size={24}
-                          />
-                        }
-                        variant="light"
-                        onPress={() => onRemove(file.id)}
-                      />
-                    )}
-                    {file.status === 'completed' && (
-                      <CheckmarkIcon className="text-success" />
-                    )}
-                    {file.status === 'error' && (
-                      <ErrorIcon className="text-danger" />
-                    )}
+                  {/* File Icon + Info */}
+                  {FileIconMap(file.type || 'file')}
+                  <div className="flex min-w-0 flex-col">
+                    <span
+                      className={`truncate text-sm ${
+                        file.status === 'error'
+                          ? 'text-danger'
+                          : 'text-default-foreground'
+                      }`}
+                    >
+                      {file.name}
+                    </span>
+                    <span className="text-xs text-default-500">
+                      {formatFileSize(file.size)}
+                    </span>
                   </div>
-                </li>
-                {file.isUploading && (
-                  <Button
-                    isIconOnly
-                    startContent={
-                      file.status === 'error' ? (
-                        <RestartIcon className="text-default-500" size={24} />
-                      ) : (
+                </div>
+
+                {/* RIGHT: Action Buttons */}
+                <div className="flex flex-shrink-0 items-center gap-1">
+                  {file.isUploading && (
+                    <Button
+                      isIconOnly
+                      startContent={
                         <CloseCircleIcon
                           className="text-default-500"
                           size={24}
                         />
-                      )
-                    }
-                    variant="light"
-                    onPress={() => onAbort(file.id)}
-                  />
-                )}
-              </motion.div>
+                      }
+                      variant="light"
+                      onPress={() => onAbort(file.id)}
+                    />
+                  )}
+
+                  {file.status === 'pending' && !file.isUploading && (
+                    <Button
+                      isIconOnly
+                      startContent={
+                        <UploadIcon className="text-default-500" size={24} />
+                      }
+                      variant="light"
+                      onPress={() => startUploads([file])}
+                    />
+                  )}
+
+                  {!file.isUploading && (
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      startContent={
+                        <BackspaceIcon className="text-default-500" size={24} />
+                      }
+                      variant="light"
+                      onPress={() => onRemove(file.id)}
+                    />
+                  )}
+
+                  {file.status === 'error' && !file.isUploading && (
+                    <Button
+                      isIconOnly
+                      startContent={
+                        <RestartIcon className="text-default-500" size={24} />
+                      }
+                      variant="light"
+                      onPress={() => {
+                        setFiles(prev =>
+                          prev.map(f =>
+                            f.id === file.id ? { ...f, status: 'pending' } : f,
+                          ),
+                        );
+                        startUploads([file]);
+                      }}
+                    />
+                  )}
+                </div>
+              </motion.li>
             ))}
         </AnimatePresence>
       </ul>

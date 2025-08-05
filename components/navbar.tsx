@@ -26,7 +26,7 @@ export const Navbar = () => {
 
       <NavbarContent justify="end">
         <ThemeSwitch />
-        <SettingsIcon />
+        {/* <SettingsIcon /> */}
       </NavbarContent>
     </HeroUINavbar>
   );
