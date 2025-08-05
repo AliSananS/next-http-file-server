@@ -1,8 +1,0 @@
-function update_windows_path
-    # Add Windows paths back to PATH in background
-    for dir in (string match "/mnt/*" $SLOW_PATH)
-        if test -d "$dir"
-            set -Ua PATH $dir
-        end
-    end
-end
