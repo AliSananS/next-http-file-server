@@ -1,7 +1,7 @@
 import { FileTypes } from '@/types';
 import { FolderIcon, FileIcon, FileRightIcon } from '@/components/icons';
 
-function getFileTypeIcon(fileType: FileTypes): JSX.Element {
+export default function FileIconMap(fileType: FileTypes): JSX.Element {
   switch (fileType) {
     case 'dir':
       return <FolderIcon />;
@@ -13,5 +13,3 @@ function getFileTypeIcon(fileType: FileTypes): JSX.Element {
       return <FileIcon />;
   }
 }
-
-export default getFileTypeIcon;

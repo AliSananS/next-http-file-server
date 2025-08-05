@@ -3,7 +3,7 @@ import { Tooltip } from '@heroui/tooltip';
 import { useState } from 'react';
 
 import { DirEntery, FileEntry } from '@/types';
-import { humanFileSize } from '@/lib/helpers';
+import { formatFileSize } from '@/lib/helpers';
 
 export function FileInfoModal({
   isOpen,
@@ -68,7 +68,7 @@ export function FileInfoModal({
           <InfoRow label="Name" value={file.name} />
           <InfoRow label="Path" value={file.path} />
           {file.type !== 'dir' && (
-            <InfoRow label="Size" value={humanFileSize(file.size, false)} />
+            <InfoRow label="Size" value={formatFileSize(file.size, false)} />
           )}
           <div className="mt-2 pt-2">
             <InfoRow label="Created" value={formatDate(file.time?.create)} />

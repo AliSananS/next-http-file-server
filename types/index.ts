@@ -123,3 +123,17 @@ export type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
 
 export type CopyFileResult = FileOperationsType<string, CopyFileErrorTypes>;
 export type DeleteFileResult = FileOperationsType<string, FileErrorTypes>;
+
+export type UploadFileEntry = {
+  file: File;
+  isUploading: boolean;
+  error?: FileErrorTypes | string;
+  errorMessage?: string;
+  progress: number;
+  size: number;
+  name: string;
+  type: FileTypes;
+  status: 'pending' | 'uploading' | 'completed' | 'error';
+  id: string;
+  path: string;
+};

@@ -17,12 +17,10 @@ export async function POST(req: NextRequest) {
     const result = await writeFile(filePath, file);
 
     if (!result.ok) {
-      if (result.error === 'EACCES') {
-        return NextResponse.json(
-          { ok: false, error: result.error },
-          { status: ErrorCodeMap[result.error] || 500 },
-        );
-      }
+      return NextResponse.json(
+        { ok: false, error: result.error },
+        { status: ErrorCodeMap[result.error] || 500 },
+      );
     }
   }
 

@@ -1,9 +1,16 @@
 import { useState, useRef, useCallback } from 'react';
 
+import { log } from '@/lib/log';
+
 type UploadCallback = (err: string | null, res?: any) => void;
 
 interface UseFileUploadReturn {
-  upload: (file: File, url: string, onComplete?: UploadCallback) => void;
+  upload: (
+    file: File,
+    url: string,
+    path: string,
+    onComplete?: UploadCallback,
+  ) => void;
   progress: number;
   abort: () => void;
   isUploading: boolean;
@@ -15,13 +22,15 @@ export function useFileUpload(): UseFileUploadReturn {
   const xhrRef = useRef<XMLHttpRequest | null>(null);
 
   const upload = useCallback(
-    (file: File, url: string, onComplete?: UploadCallback) => {
+    (file: File, url: string, path: string, onComplete?: UploadCallback) => {
       const xhr = new XMLHttpRequest();
+
+      log.debug(`Uploading file: ${file.name} to ${url}`);
 
       xhrRef.current = xhr;
 
       xhr.open('POST', url);
-      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest'); // optional
+      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
       xhr.upload.onprogress = event => {
         if (event.lengthComputable) {
@@ -31,14 +40,47 @@ export function useFileUpload(): UseFileUploadReturn {
 
       xhr.onload = () => {
         setIsUploading(false);
+
+        const contentType = xhr.getResponseHeader('Content-Type');
+        let responseData: any = xhr.responseText;
+
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            responseData = JSON.parse(xhr.responseText);
+            log.debug('RESPONSE DATA DID PARSE!', responseData);
+          } catch {
+            log.debug('Failed to parse JSON response', xhr.responseText);
+          }
+        }
+        log.debug(
+          `Upload response: ${xhr.status} - ${xhr.response}`,
+          'RESPONSE DATA',
+          responseData,
+          'RESPONSE END',
+          'TYPEOF RESPONSE',
+          typeof responseData,
+          'TYPEOF RESPONSE END',
+        );
+
         if (xhr.status >= 200 && xhr.status < 300) {
-          onComplete?.(null, xhr.response);
+          onComplete?.(null, responseData);
+          log.debug('Upload successful', responseData);
         } else {
-          onComplete?.(xhr.statusText || 'Upload failed');
+          log.debug(
+            `Upload failed with status ${xhr.status}: ${xhr.statusText}`,
+            responseData,
+          );
+          onComplete?.(
+            typeof responseData === 'string'
+              ? responseData
+              : responseData?.error || 'Upload failed',
+            responseData,
+          );
         }
       };
 
       xhr.onerror = () => {
+        log.debug('Upload error', xhr.statusText);
         setIsUploading(false);
         onComplete?.('Network error');
       };
@@ -50,7 +92,8 @@ export function useFileUpload(): UseFileUploadReturn {
 
       const formData = new FormData();
 
-      formData.append('file', file);
+      formData.append('files', file);
+      formData.append('path', path);
 
       setIsUploading(true);
       setProgress(0);
