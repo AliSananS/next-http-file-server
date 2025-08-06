@@ -4,6 +4,11 @@ A **sleek and sexy** file manager built with **Next.js** and **HeroUI**.
 Originally created as my **CS50x final project**, now evolving into a long-term side project.  
 Community pull requests are welcome.
 
+> [!WARNING]
+> **NHFS Is Still In Development**
+> 
+> Features are not well tested and may crash.
+
 > [!NOTE]
 > I was running out of time, so I decided to focus on the basic functionality first before adding extra features like authentication and search.
 
