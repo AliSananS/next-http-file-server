@@ -10,6 +10,7 @@ Community pull requests are welcome.
 ---
 
 ## ✨ Features — Ready ✅
+
 - **Preview Files** — Videos, Images and Audio.
 - **File Info** — Size, Path and Date, etc.
 - **File uploads** With Drag & Drop Support
@@ -18,6 +19,7 @@ Community pull requests are welcome.
 ---
 
 ## 🚧 Features — Not Ready (Coming Soon)
+
 - **Text Preview** + Syntax Highlighting 🎨
 - **Authentication**
 - **Search**
@@ -26,6 +28,7 @@ Community pull requests are welcome.
 ---
 
 ## 📂 Tech Stack
+
 - **Next.js 15 (App Router)**
 - **HeroUI** (UI components)
 - **React Dropzone** (drag-and-drop)
@@ -39,10 +42,11 @@ Community pull requests are welcome.
 This project doesn’t have a CLI installer yet, so you’ll need to run it manually:
 
 ### 1️⃣ Clone the repository
+
 ```bash
 git clone https://github.com/AliSananS/NHFS.git
 cd NHFS
-````
+```
 
 ### 2️⃣ Install dependencies
 
