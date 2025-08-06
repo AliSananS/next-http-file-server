@@ -26,7 +26,7 @@ Community pull requests are welcome.
 - **Text Preview** + Syntax Highlighting 🎨
 - **Authentication**
 - **Search**
-- **Secure file operations** (e.g., permission checks for delete, move, copy)
+- **Secure file operations** (e.g., secure delete, move, copy operations)
 
 ---
 
