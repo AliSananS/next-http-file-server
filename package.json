@@ -1,7 +1,33 @@
 {
   "name": "nhfs",
-  "version": "0.0.1",
-  "private": true,
+  "version": "0.1.0",
+  "private": false,
+  "description": "NHFS — A sleek HTTP file server for the web built with Next.js and HeroUI",
+  "license": "MIT",
+  "author": "Ali Sanan",
+  "type": "git",
+    "url": "https://github.com/AliSananS/NHFS.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AliSananS/NHFS/issues"
+  },
+"keywords": [
+    "file-server",
+    "http-server",
+    "http-file-server",
+    "nextjs",
+    "react",
+    "heroui",
+    "file-manager",
+    "file-upload",
+    "cs50x",
+    "drag-drop",
+    "typescript",
+    "app-router"
+  ],
+  "bin": {
+    "nhfs": "./bin/index.js"
+  }
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbo",
@@ -10,9 +36,6 @@
     "lint:fix": "next lint --fix",
     "format:check": "prettier .",
     "format": "prettier -w ."
-  },
-  "bin": {
-    "nhfs": "./bin.js"
   },
   "dependencies": {
     "@heroui/breadcrumbs": "^2.2.17",
