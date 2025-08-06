@@ -39,6 +39,10 @@ Community pull requests are welcome.
 
 ---
 
+> [!WARNING]
+> **Windows support** is not tested yet.
+> If you are on windows use WSL
+
 ## 🧪 Testing Locally (Manual Setup)
 
 This project doesn’t have a CLI installer yet, so you’ll need to run it manually:
