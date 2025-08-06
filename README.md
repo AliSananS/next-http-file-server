@@ -45,6 +45,12 @@ Community pull requests are welcome.
 
 ## 🧪 Testing Locally (Manual Setup)
 
+> [!NOTE]
+> **Requirements:**
+> 
+> - Make sure [node.js](https://nodejs.org/en/download) version `>=18.18.0` is installed.
+> - Linux🐧 or a Mac🍎 system.
+
 This project doesn’t have a CLI installer yet, so you’ll need to run it manually:
 
 ### 1️⃣ Clone the repository
