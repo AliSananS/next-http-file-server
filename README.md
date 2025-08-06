@@ -4,6 +4,11 @@ A **sleek and sexy** file manager built with **Next.js** and **HeroUI**.
 Originally created as my **CS50x final project**, now evolving into a long-term side project.  
 Community pull requests are welcome.
 
+> [!WARNING]
+> **NHFS Is Still In Development**
+> 
+> Features are not well tested and may crash.
+
 > [!NOTE]
 > I was running out of time, so I decided to focus on the basic functionality first before adding extra features like authentication and search.
 
@@ -23,7 +28,7 @@ Community pull requests are welcome.
 - **Text Preview** + Syntax Highlighting 🎨
 - **Authentication**
 - **Search**
-- **Secure file operations** (e.g., permission checks for delete, move, copy)
+- **Secure file operations** (e.g., secure delete, move, copy operations)
 
 ---
 
@@ -37,7 +42,17 @@ Community pull requests are welcome.
 
 ---
 
+> [!WARNING]
+> **Windows support** is not tested yet.
+> If you are on windows use WSL
+
 ## 🧪 Testing Locally (Manual Setup)
+
+> [!NOTE]
+> **Requirements:**
+> 
+> - Make sure [node.js](https://nodejs.org/en/download) version `>=18.18.0` is installed.
+> - Linux🐧 or a Mac🍎 system.
 
 This project doesn’t have a CLI installer yet, so you’ll need to run it manually:
 
