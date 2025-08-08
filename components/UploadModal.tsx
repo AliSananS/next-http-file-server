@@ -20,6 +20,7 @@ import {
   BackspaceIcon,
   CheckmarkIcon,
   CloseCircleIcon,
+  CloseIcon,
   ErrorIcon,
   FileIcon,
   FolderOpenIcon,
@@ -213,7 +214,14 @@ export default function UploadModal({
                     files={files}
                     setFiles={setFiles}
                     startUploads={file => file && handleUploads(file)}
-                    onAbort={id => abort()}
+                    onAbort={id => {
+                      abort();
+                      setFiles(prev =>
+                        prev.map(f =>
+                          f.id === id ? { ...f, status: 'pending' } : f,
+                        ),
+                      );
+                    }}
                     onClear={() => {
                       setFiles([]);
                       setAcceptedFiles([]);
@@ -344,6 +352,7 @@ const FilesList = ({
           <Button
             color="danger"
             size="sm"
+            startContent={<CloseCircleIcon size={18} />}
             variant="light"
             onPress={() => {
               files.forEach(f => {
@@ -360,7 +369,7 @@ const FilesList = ({
               });
             }}
           >
-            Stop All Uploads
+            Stop All
           </Button>
         ) : (
           <Button color="default" size="sm" variant="light" onPress={onClear}>
@@ -430,7 +439,9 @@ const FilesList = ({
                 </AnimatePresence>
 
                 {/* File Icon + Info */}
-                {FileIconMap(file.type || 'file')}
+                <span className="size-4">
+                  {FileIconMap(file.type || 'file')}
+                </span>
                 <div className="flex min-w-0 flex-col">
                   <span
                     className={`truncate text-sm ${
