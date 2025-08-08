@@ -1,10 +1,11 @@
 import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/modal';
 import { Tooltip } from '@heroui/tooltip';
 import { useState } from 'react';
+import clsx from 'clsx';
 
-import { DirEntery, FileEntry } from '@/types';
+import { DirEntry, FileEntry } from '@/types';
 import { formatFileSize } from '@/lib/helpers';
-import { ModalClassNames } from '@/components/classNames';
+import { modal } from '@/components/sharedStyles';
 
 export function FileInfoModal({
   isOpen,
@@ -13,7 +14,7 @@ export function FileInfoModal({
 }: {
   isOpen: boolean;
   onClose: () => void;
-  file: FileEntry | DirEntery;
+  file: FileEntry | DirEntry;
 }) {
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
@@ -51,7 +52,7 @@ export function FileInfoModal({
   return (
     <Modal
       backdrop="blur"
-      classNames={{ ...ModalClassNames }}
+      classNames={{ base: clsx(modal?.base) }}
       isOpen={isOpen}
       motionProps={{
         variants: {

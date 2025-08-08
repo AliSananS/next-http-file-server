@@ -19,7 +19,9 @@ import { FileErrorMap } from '@/types/fileErrors';
 import { log } from '@/lib/log';
 import { sanitizeUrlPath } from '@/lib/helpers';
 
-const baseDir = path.resolve(process.env.BASE_DIR || process.cwd());
+const baseDir = path.resolve(
+  process.env.BASE_DIR || process.env.NHFS_BASE_DIR || process.cwd(),
+);
 
 export function getErrorMsg(code: FileErrorTypes) {
   return FileErrorMap[code]?.message || FileErrorMap.UNKNOWN.message;

@@ -41,7 +41,7 @@ export function sanitizeUrlPath(urlPath: string) {
  *
  * @return Formatted string.
  */
-export function formatFileSize(bytes: number, si = true, dp = 1) {
+export function formatFileSize(bytes: number, si = false, dp = 1) {
   const thresh = si ? 1000 : 1024;
 
   if (Math.abs(bytes) < thresh) {

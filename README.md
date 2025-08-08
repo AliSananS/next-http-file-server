@@ -24,9 +24,11 @@ Community pull requests are welcome.
 
 ## 🚧 Features — Not Ready (Coming Soon)
 - **Text Preview** + Syntax Highlighting 🎨
+- **Resumable downloads**
 - **Authentication**
 - **Search**
 - **Secure file operations** (e.g., secure delete, move, copy operations)
+- **Multiple file selection**
 
 ---
 
