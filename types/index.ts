@@ -42,7 +42,7 @@ export type FileEntry = {
   time?: FileTimeEntry;
 };
 
-export type DirEntery = {
+export type DirEntry = {
   name: string;
   path: string;
   parentPath: string;
@@ -57,14 +57,14 @@ export type FileOperationError = {
   msg: string;
 };
 
-export type FileEntrySuccess = DirEntery | FileEntry;
+export type FileEntrySuccess = DirEntry | FileEntry;
 
 export type FileEntryError = {
   code: FileErrorTypes;
   msg?: unknown;
 };
 
-export type GetDataResult = Result<DirEntery | FileEntry, FileEntryError>;
+export type GetDataResult = Result<DirEntry | FileEntry, FileEntryError>;
 
 export type FilePermissions =
   | ['read'?, 'write'?, 'execute'?]
@@ -126,7 +126,6 @@ export type DeleteFileResult = FileOperationsType<string, FileErrorTypes>;
 
 export type UploadFileEntry = {
   file: File;
-  isUploading: boolean;
   error?: FileErrorTypes | string;
   errorMessage?: string;
   progress: number;

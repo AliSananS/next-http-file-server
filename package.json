@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": " echo http://localhost:3000/test-dir/ && next dev --turbopack",
     "build": "next build --turbo",
     "start": "next start",
     "lint": "next lint",

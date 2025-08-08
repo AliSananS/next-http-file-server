@@ -11,26 +11,26 @@ import {
   ModalFooter,
   ModalHeader,
 } from '@heroui/modal';
-import { Kbd } from '@heroui/kbd';
 import { addToast } from '@heroui/toast';
+import clsx from 'clsx';
 
 import { useClipboard } from '@/hooks/ClipboardContext';
 import {
   PasteIcon,
   AddFolderIcon,
-  UploadIcon,
   FolderErrorIcon,
   FolderIcon,
+  UploadCloudIcon,
 } from '@/components/icons';
 import { copyFileAction, createFolderAction } from '@/app/actions';
 import { FileErrorMap } from '@/types/fileErrors';
 import { getRandomFolderPlaceholder } from '@/lib/helpers';
 import UploadModal from '@/components/UploadModal';
 import { useDropzoneContext } from '@/hooks/DropzoneContext';
-import { ModalClassNames } from '@/components/classNames';
+import { modal as modalStyles } from '@/components/sharedStyles';
 
 function ensureRelative(path: string): string {
-  return path.startsWith('/') ? path.slice(1) : path;
+  return path.replace(/^\/+/, '');
 }
 
 export function ActionButtons() {
@@ -38,12 +38,20 @@ export function ActionButtons() {
   const pathname = usePathname();
   const { item, clear } = useClipboard();
   const [isPasting, startTransition] = useTransition();
-  const { isUploadModalOpen, setIsUploadModalOpen, isFileBeingDragged } =
-    useDropzoneContext();
+  const { isUploadModalOpen, setIsUploadModalOpen } = useDropzoneContext();
 
-  const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
-  const [folderName, setFolderName] = useState('');
-  const [isCreatingFolder, setIsCreatingFolder] = useState(false);
+  const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] =
+    useState<boolean>(false);
+  const [folderName, setFolderName] = useState<string>('');
+  const [isCreatingFolder, setIsCreatingFolder] = useState<boolean>(false);
+  const [width, setWidth] = useState<number>(0); // Can't use window.innerHeight here
+
+  useEffect(() => {
+    setWidth(window.innerWidth);
+    window.addEventListener('resize', () => setWidth(window.innerWidth));
+
+    return () => window.removeEventListener('resize', () => {});
+  }, []);
 
   const handlePaste = async () => {
     startTransition(async () => {
@@ -73,7 +81,7 @@ export function ActionButtons() {
     if (!folderName.trim()) return;
 
     setIsCreatingFolder(true);
-    const dirPath = `${ensureRelative(pathname)}/${folderName.trim()}`;
+    const dirPath = ensureRelative(pathname + '/' + folderName.trim());
     const result = await createFolderAction(dirPath);
 
     if (!result.ok) {
@@ -114,19 +122,21 @@ export function ActionButtons() {
           color="default"
           endContent={<AddFolderIcon size={16} weight="Outline" />}
           htmlFor="uploadInput"
+          isIconOnly={width < 640}
           size="sm"
           variant="light"
           onPress={() => setIsCreateFolderModalOpen(true)}
         >
-          New folder
+          {width >= 640 && 'New folder'}
         </Button>
         <Button
           color="primary"
-          endContent={<UploadIcon size={16} />}
+          endContent={<UploadCloudIcon size={16} />}
+          isIconOnly={width <= 640}
           size="sm"
           onPress={() => setIsUploadModalOpen(true)}
         >
-          Upload
+          {width >= 640 && 'Upload'}
         </Button>
       </div>
 
@@ -134,7 +144,7 @@ export function ActionButtons() {
       <Modal
         hideCloseButton
         backdrop="blur"
-        classNames={{ ...ModalClassNames }}
+        classNames={{ base: clsx(modalStyles?.base) }}
         isOpen={isCreateFolderModalOpen}
         motionProps={{
           variants: {
@@ -184,14 +194,6 @@ export function ActionButtons() {
             </Button>
             <Button
               color="primary"
-              endContent={
-                <Kbd
-                  classNames={{
-                    base: 'bg-transparent border-none shadow-none p-0 m-0',
-                  }}
-                  keys={['enter']}
-                />
-              }
               isLoading={isCreatingFolder}
               onPress={handleCreateFolder}
             >

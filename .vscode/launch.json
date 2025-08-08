@@ -8,6 +8,9 @@
         "cwd": "${workspaceFolder}",
         "runtimeExecutable": "npm",
         "runtimeArgs": ["run", "dev"],
+        "env": {
+          "NHFS_BASE_DIR": "/home/ali"
+        },
         "skipFiles": ["<node_internals>/**"],
         "sourceMapPathOverrides": {
           "webpack:///./~/*": "${workspaceFolder}/node_modules/*",

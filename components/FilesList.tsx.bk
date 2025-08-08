@@ -12,7 +12,7 @@ import {
 import { addToast } from '@heroui/toast';
 import { useRouter } from 'next/navigation';
 import { Input } from '@heroui/input';
-import { useRef, useState, useTransition } from 'react';
+import { ReactNode, useState, useTransition } from 'react';
 import { Button } from '@heroui/button';
 import {
   Modal,
@@ -22,7 +22,6 @@ import {
   ModalHeader,
   useDisclosure,
 } from '@heroui/modal';
-import clsx from 'clsx';
 
 import {
   CopyIcon,
@@ -43,11 +42,11 @@ import { modal } from '@/components/sharedStyles';
 
 export default function FilesList({ files }: { files: DirEntry }) {
   return (
-    <ul className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2">
       {files.children.map(file => (
-        <li
+        <div
           key={file.path.toString()}
-          className="flex flex-row justify-between overflow-hidden rounded-md bg-content2/75 pl-4 hover:bg-content2 dark:bg-content1/75 hover:dark:bg-content1"
+          className="flex h-8 w-full flex-row justify-between overflow-hidden rounded-md bg-content2/75 pl-4 hover:bg-content2 dark:bg-content1/75 hover:dark:bg-content1"
         >
           <LeftWrapper
             href={path.join('/', file.path.toString())}
@@ -55,9 +54,9 @@ export default function FilesList({ files }: { files: DirEntry }) {
             title={file.name}
           />
           <RightWrapper file={file} />
-        </li>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }
 
@@ -71,9 +70,12 @@ const LeftWrapper = ({
   icon: JSX.Element;
 }) => {
   return (
-    <div className="flex w-[90%] flex-row items-center gap-2 py-2">
-      <div className="size-4">{icon}</div>
-      <Link className="truncate text-sm font-light hover:underline" href={href}>
+    <div className="flex flex-row items-center gap-2">
+      {icon}
+      <Link
+        className="overflow-clip text-nowrap text-sm font-light hover:underline"
+        href={href}
+      >
         {title}
       </Link>
     </div>
@@ -89,7 +91,6 @@ const RightWrapper = ({ file }: { file: DirEntry['children'][number] }) => {
   const [isDeleting, startDeleteTransaction] = useTransition();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isFileInfoModalOpen, setIsFileInfoModalOpen] = useState(false);
-  const downloadButtonRef = useRef<HTMLAnchorElement>(null);
 
   const copyHandler = (
     file: DirEntry | FileEntry,
@@ -164,22 +165,70 @@ const RightWrapper = ({ file }: { file: DirEntry['children'][number] }) => {
 
   return (
     <div className="flex flex-row items-center">
-      <a
-        ref={downloadButtonRef}
-        className="hidden"
-        href={path.join('/', file.path) + '?dl=true'}
+      <FileDropdown
+        file={file}
+        onCopy={() => copyHandler(file)}
+        onDelete={() => setIsDeleteModalOpen(true)}
+        onInfo={() => setIsFileInfoModalOpen(true)}
+        onMove={() => copyHandler(file, { move: true })}
+        onRename={() => setIsRenameModalOpen(true)}
       >
-        download
-      </a>
-      <Dropdown backdrop="blur">
+        <div className="flex h-full w-8 items-center justify-center from-content1 to-content2 hover:cursor-pointer hover:bg-gradient-to-r">
+          <MenuDotsIcon
+            className="rotate-90 text-default-500 focus:outline-none"
+            focusable={false}
+            weight="Bold"
+          />
+        </div>
+      </FileDropdown>
+      <FileInfoModal
+        file={file}
+        isOpen={isFileInfoModalOpen}
+        onClose={() => setIsFileInfoModalOpen(false)}
+      />
+      <DeleteFileModal
+        file={file}
+        isDeleting={isDeleting}
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onDelete={() => deleteHandler(file)}
+      />
+      <RenameFileModal
+        file={file}
+        isOpen={isRenameModalOpen}
+        isRenaming={isRenaming}
+        newFilename={newFilename}
+        setNewFilename={setNewFilename}
+        onClose={() => setIsRenameModalOpen(false)}
+        onRename={() => renameHandler(file)}
+      />
+    </div>
+  );
+  // Dropdown as a separate component
+  function FileDropdown({
+    file,
+    onCopy,
+    onMove,
+    onRename,
+    onDelete,
+    onInfo,
+    children,
+  }: {
+    file: DirEntry['children'][number];
+    onCopy: () => void;
+    onMove: () => void;
+    onRename: () => void;
+    onDelete: () => void;
+    onInfo: () => void;
+    children: ReactNode;
+  }) {
+    return (
+      <Dropdown
+        backdrop="blur"
+        classNames={{ content: 'bg-black border-1 border-divider' }}
+      >
         <DropdownTrigger className="active:border-none">
-          <div className="flex size-full w-8 cursor-pointer items-center justify-center hover:bg-content2/70">
-            <MenuDotsIcon
-              className="rotate-90 text-default-500 focus:outline-none"
-              focusable={false}
-              weight="Bold"
-            />
-          </div>
+          {children}
         </DropdownTrigger>
         <DropdownMenu>
           <DropdownSection>
@@ -189,45 +238,35 @@ const RightWrapper = ({ file }: { file: DirEntry['children'][number] }) => {
                 className="hover:bg-primary-50"
                 startContent={<DownloadIcon />}
                 onPress={() => {
-                  downloadButtonRef.current?.click();
+                  window.location.href = file.path + '?dl=true';
                 }}
               >
                 Download
               </DropdownItem>
-            ) : (
-              <></>
-            )}
-
+            ) : null}
             <DropdownItem
               key="copy"
               className="select-none"
-              // description={`Copy ${fileType} to`}
               closeOnSelect={false}
               startContent={
                 <div className="h-4 w-4">
                   <CopyIcon />
                 </div>
               }
-              onPress={() => {
-                copyHandler(file);
-              }}
+              onPress={onCopy}
             >
               Copy
             </DropdownItem>
-
             <DropdownItem
               key="move"
               className="select-none"
               closeOnSelect={false}
-              // description={`Move ${fileType} to`}
               startContent={
                 <div className="h-4 w-4">
                   <CutIcon />
                 </div>
               }
-              onPress={() => {
-                copyHandler(file, { move: true });
-              }}
+              onPress={onMove}
             >
               Move
             </DropdownItem>
@@ -239,7 +278,7 @@ const RightWrapper = ({ file }: { file: DirEntry['children'][number] }) => {
                   <RenameIcon />
                 </div>
               }
-              onPress={() => setIsRenameModalOpen(true)}
+              onPress={onRename}
             >
               Rename
             </DropdownItem>
@@ -251,7 +290,7 @@ const RightWrapper = ({ file }: { file: DirEntry['children'][number] }) => {
               color="danger"
               startContent={<DeleteIcon />}
               variant="solid"
-              onPress={() => setIsDeleteModalOpen(true)}
+              onPress={onDelete}
             >
               Delete
             </DropdownItem>
@@ -259,25 +298,36 @@ const RightWrapper = ({ file }: { file: DirEntry['children'][number] }) => {
           <DropdownSection>
             <DropdownItem
               key="info"
-              // description="File information"
               startContent={<InfoIcon />}
-              onPress={() => setIsFileInfoModalOpen(true)}
+              onPress={onInfo}
             >
               Info
             </DropdownItem>
           </DropdownSection>
         </DropdownMenu>
       </Dropdown>
-      <FileInfoModal
-        file={file}
-        isOpen={isFileInfoModalOpen}
-        onClose={() => setIsFileInfoModalOpen(false)}
-      />
+    );
+  }
+
+  function DeleteFileModal({
+    file,
+    isOpen,
+    isDeleting,
+    onClose,
+    onDelete,
+  }: {
+    file: DirEntry['children'][number];
+    isOpen: boolean;
+    isDeleting: boolean;
+    onClose: () => void;
+    onDelete: () => void;
+  }) {
+    return (
       <Modal
         hideCloseButton
         backdrop="blur"
         classNames={{ base: modal?.base }}
-        isOpen={isDeleteModalOpen}
+        isOpen={isOpen}
         motionProps={{
           variants: {
             enter: { opacity: 1, y: 0 },
@@ -293,7 +343,6 @@ const RightWrapper = ({ file }: { file: DirEntry['children'][number] }) => {
               This action is irreversible. You sure about this?
             </span>
           </ModalHeader>
-
           <ModalBody>
             <div className="flex items-center gap-3 p-1">
               <span className="text-lg">🗑️</span>
@@ -302,31 +351,57 @@ const RightWrapper = ({ file }: { file: DirEntry['children'][number] }) => {
               </span>
             </div>
           </ModalBody>
-
           <ModalFooter>
             <Button
               className="text-default-500"
               variant="light"
-              onPress={() => setIsDeleteModalOpen(false)}
+              onPress={onClose}
             >
               Cancel
             </Button>
             <Button
               color="danger"
               isLoading={isDeleting}
-              onPress={() => deleteHandler(file)}
+              onPress={onDelete}
             >
               Delete
             </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
+    );
+  }
 
+  function RenameFileModal({
+    file,
+    isOpen,
+    isRenaming,
+    newFilename,
+    setNewFilename,
+    onClose,
+    onRename,
+  }: {
+    file: DirEntry['children'][number];
+    isOpen: boolean;
+    isRenaming: boolean;
+    newFilename: string;
+    setNewFilename: (name: string) => void;
+    onClose: () => void;
+    onRename: () => void;
+  }) {
+    return (
       <Modal
         hideCloseButton
         backdrop="blur"
-        classNames={{ base: clsx(modal?.base) }}
-        isOpen={isRenameModalOpen}
+        classNames={{ base: modal?.base }}
+        isOpen={isOpen}
+        motionProps={{
+          variants: {
+            enter: { opacity: 1, y: 0 },
+            exit: { opacity: 0, y: -20 },
+          },
+          transition: { duration: 0.2 },
+        }}
       >
         <ModalContent className="rounded-xl shadow-xl">
           <ModalHeader className="flex flex-col gap-1">
@@ -335,53 +410,43 @@ const RightWrapper = ({ file }: { file: DirEntry['children'][number] }) => {
               Give your file a new identity 👀
             </span>
           </ModalHeader>
-
           <ModalBody>
             <Input
               // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
-              className="font-mono font-normal"
               classNames={{
-                inputWrapper: [
-                  'bg-content1/70',
-                  'hover:bg-content1',
-                  'group-data-[focus=true]:bg-content1',
-                  'group-data-[hover=true]:bg-content2',
-                ],
-                innerWrapper: 'bg-transparent hover:bg-transparent',
-                input: 'bg-transparent, hover:bg-transparent',
+                inputWrapper: 'border-default-200 hover:border-primary',
+                input: 'text-base font-medium',
               }}
               defaultValue={file.name}
               placeholder="Enter new name"
               radius="lg"
               size="lg"
-              spellCheck="false"
-              startContent={<RenameIcon size={18} />}
-              variant="flat"
+              startContent={
+                <span className="text-sm text-default-400">📄</span>
+              }
+              variant="bordered"
               onValueChange={text => setNewFilename(text)}
             />
           </ModalBody>
-
           <ModalFooter>
             <Button
               className="text-default-500"
               variant="light"
-              onPress={() => setIsRenameModalOpen(false)}
+              onPress={onClose}
             >
               Cancel
             </Button>
             <Button
               color="primary"
               isLoading={isRenaming}
-              onPress={() => {
-                renameHandler(file);
-              }}
+              onPress={onRename}
             >
               Save
             </Button>
           </ModalFooter>
         </ModalContent>
       </Modal>
-    </div>
-  );
+    );
+  }
 };
