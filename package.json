@@ -5,7 +5,7 @@
   "private": false,
   "scripts": {
     "dev": " echo http://localhost:3000/test-dir/ && next dev --turbopack",
-    "build": "next build --turbo",
+    "build": "next build --turbo && cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
