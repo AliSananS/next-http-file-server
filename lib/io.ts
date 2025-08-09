@@ -257,16 +257,18 @@ export async function checkFilePermissions(
     return 'EACCES';
   }
 
-  const stats = await getStats(resolvedPath.path);
+  // TODO: Test getStats function. (not using it for now)
 
-  if (
-    !stats ||
-    !stats.isFile() ||
-    !stats.isDirectory ||
-    !stats.isSymbolicLink
-  ) {
-    return 'ENOENT';
-  }
+  // const stats = await getStats(resolvedPath.path);
+
+  // if (
+  //   !stats ||
+  //   !stats.isFile() ||
+  //   !stats.isDirectory ||
+  //   !stats.isSymbolicLink
+  // ) {
+  //   return 'ENOENT';
+  // }
 
   if (!existsSync(resolvedPath.path)) {
     log.error("checkFilePermissions(): File doesn't exist.", relPath);
