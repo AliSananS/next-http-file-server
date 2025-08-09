@@ -19,11 +19,11 @@ const path = require('path');
 
     // Check if build exists
     try {
-      execSync(`node ${nextBinary}`, { stdio: 'inherit' });
-    } catch {
-      console.log('📦 No production build found, building first...');
-      execSync(`npm run build`, { stdio: 'inherit' });
       execSync(`PORT=${port} node ${nextBinary}`, { stdio: 'inherit' });
+    } catch {
+      // console.log('📦 No production build found, building first...');
+      // execSync(`npm run build`, { stdio: 'inherit' });
+      // execSync(`PORT=${port} node ${nextBinary}`, { stdio: 'inherit' });
     }
   } catch (err) {
     console.error('❌ Failed to start NHFS:', err);
