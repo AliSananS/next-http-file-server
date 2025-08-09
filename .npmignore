@@ -1,6 +1,7 @@
 node_modules
 .vercel
-.next/
+.next
+.next/diagnostics
 .env
 .DS_Store
 
@@ -8,3 +9,4 @@ test-dir
 test-folder
 .vscode
 .idea
+.env
