@@ -1,3 +1,4 @@
+'use server';
 import FilesContainer from './FilesContainer';
 
 import { getData } from '@/lib/io';

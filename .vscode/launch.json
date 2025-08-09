@@ -9,7 +9,7 @@
         "runtimeExecutable": "npm",
         "runtimeArgs": ["run", "dev"],
         "env": {
-          "NHFS_BASE_DIR": "/home/ali"
+          "NHFS_BASE_DIR": "/home/ali/test-dir"
         },
         "skipFiles": ["<node_internals>/**"],
         "sourceMapPathOverrides": {

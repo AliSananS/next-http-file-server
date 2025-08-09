@@ -190,6 +190,7 @@ export default function UploadModal({
       backdrop="blur"
       classNames={{ base: clsx(modal?.base) }}
       isOpen={isOpen}
+      scrollBehavior="inside"
       onClose={onClose}
     >
       <ModalContent>

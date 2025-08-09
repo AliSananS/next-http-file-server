@@ -1,11 +1,7 @@
-'use server';
-
-import path from 'path';
-
 import ShowFiles from '@/components/ShowFiles';
 
-export default async function Home() {
-  const dir = path.join('./');
+export const revalidate = 0;
 
-  return <ShowFiles params={[dir]} />;
+export default function Home() {
+  return <ShowFiles params={['./']} />;
 }

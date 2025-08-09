@@ -1,7 +1,8 @@
 {
   "name": "nhfs",
-  "version": "0.0.1",
-  "private": true,
+  "version": "0.1.1",
+  "description": "NHFS — A sleek HTTP file server for the web built with Next.js and HeroUI. (Alpha)",
+  "private": false,
   "scripts": {
     "dev": " echo http://localhost:3000/test-dir/ && next dev --turbopack",
     "build": "next build --turbo",
@@ -11,12 +12,15 @@
     "format:check": "prettier .",
     "format": "prettier -w ."
   },
+
   "bin": {
     "nhfs": "./bin.js"
   },
+  
   "engines": {
-        "node": ">=18.18.0"
+    "node": ">=18.18.0"
   },
+
   "dependencies": {
     "@heroui/breadcrumbs": "^2.2.17",
     "@heroui/button": "2.2.21",
@@ -66,6 +70,7 @@
     "@types/react-dom": "18.3.0",
     "@typescript-eslint/eslint-plugin": "8.31.1",
     "@typescript-eslint/parser": "^8.35.0",
+    "@yao-pkg/pkg": "^6.6.0",
     "autoprefixer": "10.4.21",
     "eslint": "^9.31.0",
     "eslint-config-next": "15.3.1",

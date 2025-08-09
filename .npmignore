@@ -1,0 +1,10 @@
+node_modules
+.vercel
+.next/cache
+.env
+.DS_Store
+
+test-dir
+test-folder
+.vscode
+.idea

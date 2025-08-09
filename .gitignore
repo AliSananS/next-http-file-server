@@ -40,6 +40,7 @@ next-env.d.ts
 /files
 /files.zip
 /test-dir
+/test-folder
 
 #lock files
 bun.lock
