@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, stat, Stats } from 'node:fs';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
@@ -234,6 +234,18 @@ export async function checkFileType(relPath: string): Promise<FileTypes> {
   return 'other';
 }
 
+const getStats = async (absolutePath: string): Promise<Stats | false> => {
+  try {
+    const stats = await fs.stat(absolutePath);
+
+    return stats;
+  } catch (err) {
+    console.error(`Error checking permissions for '${absolutePath}'`);
+
+    return false;
+  }
+};
+
 export async function checkFilePermissions(
   relPath: string,
 ): Promise<FilePermissions> {
@@ -243,6 +255,17 @@ export async function checkFilePermissions(
     log.error('checkFilePermissions(): Invalid path.', relPath);
 
     return 'EACCES';
+  }
+
+  const stats = await getStats(resolvedPath.path);
+
+  if (
+    !stats ||
+    !stats.isFile() ||
+    !stats.isDirectory ||
+    !stats.isSymbolicLink
+  ) {
+    return 'ENOENT';
   }
 
   if (!existsSync(resolvedPath.path)) {
