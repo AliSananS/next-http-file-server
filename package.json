@@ -1,6 +1,6 @@
 {
   "name": "nhfs",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "NHFS — A sleek HTTP file server for the web built with Next.js and HeroUI. (Alpha)",
   "private": false,
   "scripts": {
