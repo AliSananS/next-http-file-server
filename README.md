@@ -114,6 +114,11 @@ npm start
 
 See the [Contributing Guide](docs/contributing.md).
 
+> [!NOTE]
+> Life’s a little packed for me right now — I’m balancing a busy schedule and a few other projects.
+> I still care about this one and will check in when I can, but updates might be a bit slower.
+> Thanks for your patience and for giving it a try! 💛
+
 ---
 
 ## 📜 License
