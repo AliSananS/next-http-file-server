@@ -1,6 +1,12 @@
 node_modules
 .vercel
+<<<<<<< HEAD
 /.next
+=======
+.next
+.next/diagnostics
+.env
+>>>>>>> c02606bb58da853f5f21752a8d916de34776b958
 .DS_Store
 
 /test-dir

@@ -57,7 +57,11 @@ function parseArgs(argv) {
     if (args.port) process.env.NHFS_PORT = args.port;
     if (args.dir) process.env.NHFS_BASE_DIR = path.resolve(args.dir);
 
+<<<<<<< HEAD
     const nextBinary = path.join(__dirname, 'dist', 'server.js');
+=======
+    const nextBinary = path.join('build', 'server.js');
+>>>>>>> c02606bb58da853f5f21752a8d916de34776b958
     const port = process.env.NHFS_PORT || 3000;
     const host = args.hostname || 'localhost';
 

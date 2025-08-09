@@ -1,12 +1,20 @@
 {
   "name": "nhfs",
+<<<<<<< HEAD
   "version": "0.1.33",
+=======
+  "version": "0.1.3",
+>>>>>>> c02606bb58da853f5f21752a8d916de34776b958
   "description": "NHFS — A sleek HTTP file server for the web built with Next.js and HeroUI. (Alpha)",
   "private": false,
   "scripts": {
     "dev": " echo http://localhost:3000/test-dir/ && next dev --turbopack",
     "build": "next build --turbo && npm run build:move",
+<<<<<<< HEAD
     "build:move": "cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/ && cp -rf .next/standalone ./dist",
+=======
+    "build:move": "cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/ && cp -rf .next/standalone/ ./build",
+>>>>>>> c02606bb58da853f5f21752a8d916de34776b958
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
