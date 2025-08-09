@@ -1,4 +1,4 @@
-import { existsSync, PathLike } from 'node:fs';
+import { existsSync } from 'node:fs';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 
@@ -18,10 +18,7 @@ import {
 import { FileErrorMap } from '@/types/fileErrors';
 import { log } from '@/lib/log';
 import { sanitizeUrlPath } from '@/lib/helpers';
-
-const baseDir = path.resolve(
-  process.env.BASE_DIR || process.env.NHFS_BASE_DIR || process.cwd(),
-);
+import { BASE_DIR } from '@/env';
 
 export function getErrorMsg(code: FileErrorTypes) {
   return FileErrorMap[code]?.message || FileErrorMap.UNKNOWN.message;
@@ -30,11 +27,11 @@ export function getErrorMsg(code: FileErrorTypes) {
 function resolveWithBaseDir(
   relPath: string,
 ): { ok: true; path: string } | FileOperationError {
-  const sanitized = path.normalize(relPath).replace(/^(\.\.(\/|\\|$))+/, '');
+  const sanitized = path.normalize(relPath).replace(/^(\.\.(\/|\\|$))+/, ''); // Checking for ../
 
-  const fullPath = path.resolve(baseDir, sanitized);
+  const fullPath = path.resolve(BASE_DIR, sanitized);
 
-  if (!fullPath.startsWith(baseDir)) {
+  if (!fullPath.startsWith(BASE_DIR)) {
     return {
       ok: false,
       code: 'EPATHINJECTION',

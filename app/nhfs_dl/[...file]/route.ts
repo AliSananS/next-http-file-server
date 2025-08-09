@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 import mime from 'mime-types';
 
 import { getData, convertParams } from '@/lib/io';
+import { BASE_DIR } from '@/env';
 
 export async function GET(
   req: NextRequest,
@@ -24,16 +25,13 @@ export async function GET(
   }
 
   // Directory listing as JSON
-  if ('children' in result.value) {
+  if (result.value.type === 'dir') {
     return Response.json(result.value);
   }
 
   // File serving
   const relPath = convertParams(file);
-  const filePath = require('path').resolve(
-    process.env.BASE_DIR || process.cwd(),
-    relPath,
-  );
+  const filePath = require('path').resolve(BASE_DIR, relPath);
 
   // Check again for permissions
   if (result.value.permissions === 'EACCES') {

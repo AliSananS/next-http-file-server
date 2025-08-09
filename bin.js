@@ -1,39 +1,32 @@
 #!/usr/bin/env node
 
-import arg from 'arg';
-import { spawn } from 'child_process';
-import path from 'path';
-import { fileURLToPath } from 'url';
+/**
+ * NHFS — Next HTTP File Server
+ * Production server launcher
+ */
 
-// Setup __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const { execSync } = require('child_process');
+const path = require('path');
 
-// Parse CLI args
-const args = arg({
-  '--port': Number,
-  '--dir': String,
-  '--silent': Boolean,
-  '-p': '--port',
-  '-d': '--dir',
-});
+(async () => {
+  try {
+    const nextBinary = path.join(
+      'out',
+      'standalone',
+      'server.js',
+    );
+    const port = process.env.NHFS_PORT || 3000;
 
-const port = args['--port'] || 3000;
-const dir = args['--dir'] || process.cwd();
-const silent = args['--silent'] || false;
-
-if (!silent) {
-  console.log(`🚀 Starting NHFS on http://localhost:${port}`);
-  console.log(`📂 Serving: ${dir}`);
-}
-
-// Pass env vars into Next.js
-const next = spawn('npx', ['next', 'start', '-p', port], {
-  cwd: __dirname,
-  stdio: 'inherit',
-  env: {
-    ...process.env,
-    NHFS_ROOT: dir,
-    NHFS_SILENT: silent ? '1' : '0',
-  },
-});
+    // Check if build exists
+    try {
+      execSync(`node ${nextBinary}`, { stdio: 'inherit' });
+    } catch {
+      console.log('📦 No production build found, building first...');
+      execSync(`npm run build`, { stdio: 'inherit' });
+      execSync(`PORT=${port} node ${nextBinary}`, { stdio: 'inherit' });
+    }
+  } catch (err) {
+    console.error('❌ Failed to start NHFS:', err);
+    process.exit(1);
+  }
+})();

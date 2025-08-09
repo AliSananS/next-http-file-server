@@ -18,7 +18,7 @@ export default function BreadCrumbs({
   return (
     <HeroBreadcrumbs>
       <BreadcrumbItem
-        key="BASE_DIR"
+        key="ROOT"
         href="/"
         isCurrent={items.length < 1}
         startContent={<HomeIcon />}
