@@ -56,11 +56,10 @@ function parseArgs(argv) {
 
     if (args.port) process.env.NHFS_PORT = args.port;
     if (args.dir) process.env.NHFS_BASE_DIR = path.resolve(args.dir);
-    if (args.hostname) process.env.HOSTNAME = args.hostname;
 
-    const nextBinary = path.join('build', 'server.js');
+    const nextBinary = path.join(__dirname, 'dist', 'server.js');
     const port = process.env.NHFS_PORT || 3000;
-    const host = process.env.HOSTNAME || 'localhost';
+    const host = args.hostname || 'localhost';
 
       console.log(`📂 Serving files from: ${process.env.NHFS_BASE_DIR || process.cwd()}`);
 
@@ -68,7 +67,7 @@ function parseArgs(argv) {
       console.log(`Running Server at http://${host}:${port}`);
       execSync(`PORT=${port} HOSTNAME=${host} node ${nextBinary}`, { stdio: 'ignore' });
     } catch (err) {
-      console.error('❌ Error running server:', err.message);
+      console.error('❌ Error running server:', err);
       process.exit(1);
     }
   } catch (err) {
